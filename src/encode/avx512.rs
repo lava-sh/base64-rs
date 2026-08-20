@@ -7,8 +7,8 @@
 //! - Daniel Lemire (Correspondence: Université du Québec (TELUQ), Montreal, Canada)
 //!
 //! ### Links
-//! - Paper: https://arxiv.org/pdf/1910.05109
-//! - C implementation from paper: https://github.com/WojciechMula/base64-avx512
+//! - Paper: <https://arxiv.org/pdf/1910.05109>
+//! - C implementation from paper: <https://github.com/WojciechMula/base64-avx512>
 //!
 use core::arch::x86_64::{
     __m512i, _mm512_loadu_si512, _mm512_multishift_epi64_epi8, _mm512_permutexvar_epi8,
