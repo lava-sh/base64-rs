@@ -23,7 +23,7 @@ impl SimdIsa {
         #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
         {
             // https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#avx512techs=AVX512_VBMI
-            if is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("avx512bw") {
+            if is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("avx512vbmi") {
                 return SimdIsa::Avx512;
             }
             // https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#avxnewtechs=AVX2
