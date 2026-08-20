@@ -94,7 +94,9 @@ pub unsafe fn encode_simd_prefix(
     mut output: *mut u8,
     alphabet: *const u8,
 ) -> usize {
-    if len < 64 {
+    // One 48-byte SIMD block plus 24 bytes left for the scalar tail,
+    // so the 64-byte vector load remains in bounds.
+    if len < 72 {
         return 0;
     }
 

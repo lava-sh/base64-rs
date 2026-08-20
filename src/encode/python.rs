@@ -112,32 +112,22 @@ pub fn encode<'py>(
         let input = unsafe { input.add(consumed) };
         let output = unsafe { output.add(consumed / 3 * 4) };
         let input_len = input_len - consumed;
-        match pairs {
-            Some(pairs) => unsafe {
-                scalar::encode_raw(
-                    input,
-                    input_len,
-                    output,
-                    alphabet.as_ptr(),
-                    padded,
-                    wrapcol,
-                    pairs,
-                )
-            },
-            None if input_len >= PAIR_TABLE_MIN_INPUT => unsafe {
-                scalar::encode_with_pairs(input, input_len, output, &alphabet, padded, wrapcol)
-            },
-            None => unsafe {
-                scalar::encode_raw(
-                    input,
-                    input_len,
-                    output,
-                    alphabet.as_ptr(),
-                    padded,
-                    wrapcol,
-                    core::ptr::null(),
-                )
-            },
+        let custom_pairs = (pairs.is_none() && input_len >= PAIR_TABLE_MIN_INPUT)
+            .then(|| scalar::encode_pairs(&alphabet));
+        let pairs = custom_pairs.as_ref().map_or_else(
+            || pairs.unwrap_or(core::ptr::null()),
+            |pairs| pairs.as_ptr(),
+        );
+        unsafe {
+            scalar::encode_into(
+                input,
+                input_len,
+                output,
+                alphabet.as_ptr(),
+                u8::from(padded),
+                wrapcol,
+                pairs,
+            )
         };
     });
     Ok(unsafe { Bound::from_owned_ptr(py, result).cast_into_unchecked() })

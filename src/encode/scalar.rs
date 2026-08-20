@@ -5,7 +5,7 @@ use super::{
     python,
 };
 
-const fn encode_pairs(alphabet: &[u8; 64]) -> [u16; 4096] {
+pub const fn encode_pairs(alphabet: &[u8; 64]) -> [u16; 4096] {
     let mut buf = [0; 4096];
     let mut index = 0;
     while index < buf.len() {
@@ -117,7 +117,7 @@ unsafe fn encode_tail2(
 }
 
 #[inline(always)]
-unsafe fn encode_into(
+pub unsafe fn encode_into(
     input: *const u8,
     input_len: usize,
     output: *mut u8,
@@ -187,50 +187,6 @@ unsafe fn encode_into(
     );
 
     written
-}
-
-pub unsafe fn encode_raw(
-    input: *const u8,
-    input_len: usize,
-    output: *mut u8,
-    alphabet: *const u8,
-    padded: bool,
-    wrapcol: usize,
-    pairs: *const u16,
-) -> usize {
-    unsafe {
-        encode_into(
-            input,
-            input_len,
-            output,
-            alphabet,
-            u8::from(padded),
-            wrapcol,
-            pairs,
-        )
-    }
-}
-
-pub unsafe fn encode_with_pairs(
-    input: *const u8,
-    input_len: usize,
-    output: *mut u8,
-    alphabet: &[u8; 64],
-    padded: bool,
-    wrapcol: usize,
-) -> usize {
-    let pairs = encode_pairs(alphabet);
-    unsafe {
-        encode_raw(
-            input,
-            input_len,
-            output,
-            alphabet.as_ptr(),
-            padded,
-            wrapcol,
-            pairs.as_ptr(),
-        )
-    }
 }
 
 const unsafe fn no_simd(_: *const u8, _: usize, _: *mut u8, _: *const u8) -> usize {
