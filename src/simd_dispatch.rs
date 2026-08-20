@@ -42,7 +42,7 @@ impl SimdIsa {
 
         #[cfg(target_arch = "aarch64")]
         {
-            // ?
+            // https://developer.arm.com/architectures/instruction-sets/intrinsics/#f:@navigationhierarchiessimdisa=[Neon]
             if std::arch::is_aarch64_feature_detected!("neon") {
                 return SimdIsa::Neon;
             }
