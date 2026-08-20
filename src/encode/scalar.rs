@@ -76,7 +76,7 @@ unsafe fn begin_wrapped_quad(
 #[inline(always)]
 unsafe fn encode_tail(input: *const u8, output: *mut u8, alphabet: *const u8, padded: u8) -> usize {
     unsafe {
-        let bits = (u32::from(input.read())) << 16;
+        let bits = u32::from(input.read()) << 16;
         output.write(alphabet.add((bits >> 18) as usize & 0x3f).read());
         output
             .add(1)
@@ -99,7 +99,7 @@ unsafe fn encode_tail2(
     padded: u8,
 ) -> usize {
     unsafe {
-        let bits = (u32::from(input.read())) << 16 | (u32::from(input.add(1).read())) << 8;
+        let bits = u32::from(input.read()) << 16 | u32::from(input.add(1).read()) << 8;
         output.write(alphabet.add((bits >> 18) as usize & 0x3f).read());
         output
             .add(1)
@@ -132,59 +132,59 @@ unsafe fn encode_into(
         2 => raw_len - 1,
         _ => raw_len,
     };
-
     let output_len = if padded != 0 && !input_len.is_multiple_of(3) {
         raw_len
     } else {
         unpadded_len
     };
-
     let wrapcol = if wrapcol == 0 {
         usize::MAX
     } else {
         (wrapcol / 4).max(1) * 4
     };
 
-    let mut input = input;
+    let mut cursor = input;
     let mut written = 0;
     let mut column = 0;
     let end = unsafe { input.add(input_len - input_len % 3) };
 
-    while input < end {
-        let out = unsafe { begin_wrapped_quad(output, &mut written, &mut column, wrapcol) };
+    while cursor < end {
         unsafe {
+            let out = begin_wrapped_quad(output, &mut written, &mut column, wrapcol);
             if pair_table.is_null() {
-                encode_triplet(input, out, alphabet);
+                encode_triplet(cursor, out, alphabet);
             } else {
-                encode_triplet_pairs(input, out, pair_table);
+                encode_triplet_pairs(cursor, out, pair_table);
             }
-            input = input.add(3);
+            cursor = cursor.add(3);
         }
         written += 4;
         column += 4;
     }
 
-    let tail_len = match input_len % 3 {
-        1 => {
-            let out = unsafe { begin_wrapped_quad(output, &mut written, &mut column, wrapcol) };
-            unsafe { encode_tail(input, out, alphabet, padded) }
+    let tail_len = unsafe {
+        match input_len % 3 {
+            1 => {
+                let out = begin_wrapped_quad(output, &mut written, &mut column, wrapcol);
+                encode_tail(cursor, out, alphabet, padded)
+            }
+            2 => {
+                let out = begin_wrapped_quad(output, &mut written, &mut column, wrapcol);
+                encode_tail2(cursor, out, alphabet, padded)
+            }
+            _ => 0,
         }
-        2 => {
-            let out = unsafe { begin_wrapped_quad(output, &mut written, &mut column, wrapcol) };
-            unsafe { encode_tail2(input, out, alphabet, padded) }
-        }
-        _ => 0,
     };
     written += tail_len;
 
-    if wrapcol == usize::MAX {
-        debug_assert_eq!(written, output_len);
-    } else {
-        debug_assert_eq!(
-            written,
+    debug_assert_eq!(
+        written,
+        if wrapcol == usize::MAX {
+            output_len
+        } else {
             output_len + (output_len.saturating_sub(1) / wrapcol)
-        );
-    }
+        }
+    );
 
     written
 }
