@@ -1,6 +1,11 @@
-pub const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+#[repr(transparent)]
+pub struct AlphabetTable(pub [u8; 64]);
 
-pub const URLSAFE_ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+pub const ALPHABET: AlphabetTable =
+    AlphabetTable(*b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+
+pub const URLSAFE_ALPHABET: AlphabetTable =
+    AlphabetTable(*b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
 
 #[derive(Clone, Copy)]
 pub enum Alphabet {
@@ -9,10 +14,10 @@ pub enum Alphabet {
 }
 
 impl Alphabet {
-    pub const fn as_bytes(self) -> &'static [u8; 64] {
+    pub const fn as_bytes(self) -> &'static AlphabetTable {
         match self {
-            Self::Standard => ALPHABET,
-            Self::UrlSafe => URLSAFE_ALPHABET,
+            Self::Standard => &ALPHABET,
+            Self::UrlSafe => &URLSAFE_ALPHABET,
         }
     }
 }
