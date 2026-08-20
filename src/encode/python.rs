@@ -125,9 +125,7 @@ pub fn encode<'py>(
                 )
             },
             None if input_len >= PAIR_TABLE_MIN_INPUT => unsafe {
-                scalar::encode_with_pairs(
-                    input, input_len, output, &alphabet, padded, wrapcol,
-                )
+                scalar::encode_with_pairs(input, input_len, output, &alphabet, padded, wrapcol)
             },
             None => unsafe {
                 scalar::encode_raw(
