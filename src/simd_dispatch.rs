@@ -6,9 +6,7 @@ use core::sync::atomic::{AtomicUsize, Ordering};
 pub enum SimdIsa {
     Scalar = 0,
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
-    Sse2 = 1,
-    #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
-    Sse41 = 2,
+    Ssse3 = 1,
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     Avx2 = 3,
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
@@ -30,13 +28,16 @@ impl SimdIsa {
             if is_x86_feature_detected!("avx2") {
                 return Self::Avx2;
             }
-            // https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#ssetechs=SSE4_1
-            if is_x86_feature_detected!("sse4.1") {
-                return Self::Sse41;
-            }
-            // https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#ssetechs=SSE2
-            if is_x86_feature_detected!("sse2") {
-                return Self::Sse2;
+            // `SS*` instruction set hierarchy:
+            // SSE2
+            //  └─ SSE3
+            //      └─ SSSE3
+            //          └─ SSE4.1
+            //              └─ SSE4.2
+            //
+            // Processors with SSE4.1/SSE4.2 support always include SSSE3, so they pass this check.
+            if is_x86_feature_detected!("ssse3") {
+                return Self::Ssse3;
             }
         }
 
