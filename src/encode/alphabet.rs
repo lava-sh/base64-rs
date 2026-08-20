@@ -15,6 +15,7 @@ pub enum Alphabet {
 }
 
 impl Alphabet {
+    #[must_use]
     pub const fn as_bytes(self) -> &'static AlphabetTable {
         match self {
             Self::Standard => &ALPHABET,
@@ -22,10 +23,12 @@ impl Alphabet {
         }
     }
 
+    #[must_use]
     pub const fn table(self) -> AlphabetTable {
         *self.as_bytes()
     }
 
+    #[must_use]
     pub const fn from_altchars(altchars: [u8; 2]) -> Option<Self> {
         match altchars {
             [b'-', b'_'] => Some(Self::UrlSafe),
@@ -33,6 +36,7 @@ impl Alphabet {
         }
     }
 
+    #[must_use]
     pub const fn pairs(self) -> *const u16 {
         match self {
             Self::Standard => super::scalar::STANDARD_PAIRS.as_ptr(),
