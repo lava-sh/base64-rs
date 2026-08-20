@@ -10,6 +10,8 @@ static GLOBAL_ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
 mod base64_rs {
     use pyo3::{prelude::*, types::PyBytes};
 
+    use crate::simd_dispatch::SimdIsa;
+
     #[pymodule_export]
     #[allow(non_upper_case_globals)]
     const __version__: &str = env!("CARGO_PKG_VERSION");
@@ -25,6 +27,12 @@ mod base64_rs {
         padded: bool,
         wrapcol: isize,
     ) -> PyResult<Bound<'py, PyBytes>> {
-        todo!()
+        match SimdIsa::detected() {
+            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            SimdIsa::Avx512 => unsafe {
+                crate::encode::avx512::encode(py, s, altchars, padded, wrapcol)
+            },
+            _ => crate::encode::scalar::encode(py, s, altchars, padded, wrapcol),
+        }
     }
 }
