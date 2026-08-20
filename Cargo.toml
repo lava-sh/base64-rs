@@ -69,10 +69,12 @@ std_instead_of_core = "deny"
 std_instead_of_alloc = "deny"
 alloc_instead_of_core = "deny"
 
+inline_always = "allow"
 cast_ptr_alignment = "allow"
-# allow_attributes = "deny"
-# similar_names = "allow"
-# too_many_lines = "allow"
-# manual_let_else = "allow"
-# cast_possible_truncation = "allow"
-# missing_const_for_fn = "allow"
+missing_errors_doc = "allow"
+missing_const_for_fn = "allow"
+cast_possible_truncation = "allow"
+
+# TODO
+too_many_lines = "allow"
+missing_safety_doc = "allow"
