@@ -5,6 +5,7 @@ use super::{
     python,
 };
 
+#[must_use]
 pub const fn encode_pairs(alphabet: &[u8; 64]) -> [u16; 4096] {
     let mut buf = [0; 4096];
     let mut index = 0;

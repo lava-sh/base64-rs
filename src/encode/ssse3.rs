@@ -39,7 +39,7 @@ unsafe fn multiply_high_u16(mut left: arch::__m128i, right: arch::__m128i) -> ar
             left = inout(xmm_reg) left,
             right = in(xmm_reg) right,
             options(pure, nomem, nostack),
-        )
+        );
     };
     left
 }

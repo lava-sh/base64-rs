@@ -105,7 +105,7 @@ unsafe fn encode_block_with_altchars(
         _mm256_storeu_si256(
             output.cast(),
             translate_with_altchars(reshuffle(source), plus, slash),
-        )
+        );
     };
 }
 
