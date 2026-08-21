@@ -10,8 +10,6 @@ static GLOBAL_ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[pyo3::pymodule(name = "_base64_rs")]
 mod base64_rs {
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    use pyo3::exceptions::PyRuntimeError;
     use pyo3::{prelude::*, types::PyBytes};
 
     use crate::simd_dispatch::SimdIsa;
@@ -75,7 +73,7 @@ mod base64_rs {
                 wrapcol: isize,
             ) -> PyResult<Bound<'py, PyBytes>> {
                 if !matches!(SimdIsa::detected(), $isa) {
-                    return Err(PyRuntimeError::new_err($err_msg));
+                    return Err(pyo3::exceptions::PyRuntimeError::new_err($err_msg));
                 }
 
                 // SAFETY: the cached runtime ISA check above.
