@@ -1,4 +1,11 @@
-#![cfg_attr(target_arch = "arm", feature(stdarch_arm_neon_intrinsics))]
+#![cfg_attr(
+    target_arch = "arm",
+    feature(
+        stdarch_arm_neon_intrinsics,
+        stdarch_arm_feature_detection,
+        arm_target_feature,
+    )
+)]
 
 pub mod decode;
 pub mod encode;
