@@ -79,8 +79,15 @@ print(base64_rs.b64encode(b"lava-sh")) # b'bGF2YS1zaA=='
 
 ## Compatibility with CPython [base64][cpython-base64]
 
+`base64-rs` is a drop-in replacement for CPython's [base64][cpython-base64]
+lin on Python 3.15+. Its compatible functions use the same call signatures,
+parameters, defaults, and return values, so existing imports can be replaced
+without changing call sites.
+
 ```py
 import base64_rs as base64
+
+print(base64.b64encode(b"lava-sh")) # b'bGF2YS1zaA=='
 ```
 
 ## References
