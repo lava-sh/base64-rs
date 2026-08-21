@@ -62,6 +62,24 @@ def _b64encode_ssse3(
 ) -> builtins.bytes:
     ...
 
+def _b64encode_neon64(
+    s: ReadableBuffer,
+    altchars: ReadableBuffer | None = None,
+    *,
+    padded: builtins.bool = True,
+    wrapcol: builtins.int = 0,
+) -> builtins.bytes:
+    ...
+
+def _b64encode_neon32(
+    s: ReadableBuffer,
+    altchars: ReadableBuffer | None = None,
+    *,
+    padded: builtins.bool = True,
+    wrapcol: builtins.int = 0,
+) -> builtins.bytes:
+    ...
+
 def _b64encode_scalar(
     s: ReadableBuffer,
     altchars: ReadableBuffer | None = None,

@@ -1,3 +1,5 @@
+#![cfg_attr(target_arch = "arm", feature(stdarch_arm_neon_intrinsics))]
+
 pub mod decode;
 pub mod encode;
 pub mod simd_dispatch;
@@ -30,6 +32,14 @@ mod base64_rs {
         wrapcol: isize,
     ) -> PyResult<Bound<'py, PyBytes>> {
         match SimdIsa::detected() {
+            #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
+            SimdIsa::Neon64 => unsafe {
+                crate::encode::neon64::encode(py, s, altchars, padded, wrapcol)
+            },
+            #[cfg(target_arch = "arm")]
+            SimdIsa::Neon32 => unsafe {
+                crate::encode::neon32::encode(py, s, altchars, padded, wrapcol)
+            },
             #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
             SimdIsa::Avx512 => unsafe {
                 crate::encode::avx512::encode(py, s, altchars, padded, wrapcol)
@@ -50,9 +60,9 @@ mod base64_rs {
 
     #[rustfmt::skip]
     macro_rules! b64encode_simd_fn {
-        ($fn_name:ident, $py_name:literal, $isa:path, $err_msg:literal, $encode:path) => {
+        ($fn_name:ident, $py_name:literal, $cfg:meta, $isa:path, $err_msg:literal, $encode:path) => {
             #[allow(dead_code)]
-            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            #[cfg($cfg)]
             #[pyfunction(
                 name = $py_name,
                 signature = (s, altchars = None, *, padded = true, wrapcol = 0)
@@ -77,6 +87,7 @@ mod base64_rs {
     b64encode_simd_fn!(
         b64encode_avx512,
         "_b64encode_avx512",
+        any(target_arch = "x86", target_arch = "x86_64"),
         SimdIsa::Avx512,
         "AVX-512F and AVX-512VBMI are not supported by this CPU",
         crate::encode::avx512::encode
@@ -85,6 +96,7 @@ mod base64_rs {
     b64encode_simd_fn!(
         b64encode_avx2,
         "_b64encode_avx2",
+        any(target_arch = "x86", target_arch = "x86_64"),
         SimdIsa::Avx2,
         "AVX2 is not supported by this CPU",
         crate::encode::avx2::encode
@@ -93,6 +105,7 @@ mod base64_rs {
     b64encode_simd_fn!(
         b64encode_avx,
         "_b64encode_avx",
+        any(target_arch = "x86", target_arch = "x86_64"),
         SimdIsa::Avx,
         "AVX is not supported by this CPU",
         crate::encode::avx::encode
@@ -101,9 +114,28 @@ mod base64_rs {
     b64encode_simd_fn!(
         b64encode_ssse3,
         "_b64encode_ssse3",
+        any(target_arch = "x86", target_arch = "x86_64"),
         SimdIsa::Ssse3,
         "SSSE3 is not supported by this CPU",
         crate::encode::ssse3::encode
+    );
+
+    b64encode_simd_fn!(
+        b64encode_neon64,
+        "_b64encode_neon64",
+        any(target_arch = "aarch64", target_arch = "arm64ec"),
+        SimdIsa::Neon64,
+        "NEON is not supported by this CPU",
+        crate::encode::neon64::encode
+    );
+
+    b64encode_simd_fn!(
+        b64encode_neon32,
+        "_b64encode_neon32",
+        target_arch = "arm",
+        SimdIsa::Neon32,
+        "NEON is not supported by this CPU",
+        crate::encode::neon32::encode
     );
 
     #[pyfunction(

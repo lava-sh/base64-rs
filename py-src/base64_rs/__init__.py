@@ -19,6 +19,8 @@ try:  # noqa: RUF067
         _b64encode_avx,
         _b64encode_avx2,
         _b64encode_avx512,
+        _b64encode_neon32,
+        _b64encode_neon64,
         _b64encode_ssse3,
     )
 except ImportError:
@@ -28,5 +30,7 @@ else:
         "_b64encode_avx",
         "_b64encode_avx2",
         "_b64encode_avx512",
+        "_b64encode_neon32",
+        "_b64encode_neon64",
         "_b64encode_ssse3",
     )

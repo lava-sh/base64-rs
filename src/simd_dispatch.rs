@@ -51,18 +51,18 @@ impl SimdIsa {
                 return Self::Ssse3;
             }
         }
-        #[cfg(target_arch = "arm")]
-        {
-            // https://developer.arm.com/architectures/instruction-sets/intrinsics
-            if std::arch::is_arm_feature_detected!("neon") {
-                return Self::Neon32;
-            }
-        }
         #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
         {
             // // https://developer.arm.com/architectures/instruction-sets/intrinsics
             if std::arch::is_aarch64_feature_detected!("neon") {
                 return Self::Neon64;
+            }
+        }
+        #[cfg(target_arch = "arm")]
+        {
+            // https://developer.arm.com/architectures/instruction-sets/intrinsics
+            if std::arch::is_arm_feature_detected!("neon") {
+                return Self::Neon32;
             }
         }
 
