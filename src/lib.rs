@@ -8,7 +8,9 @@ static GLOBAL_ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[pyo3::pymodule(name = "_base64_rs")]
 mod base64_rs {
-    use pyo3::{exceptions::PyRuntimeError, prelude::*, types::PyBytes};
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    use pyo3::exceptions::PyRuntimeError;
+    use pyo3::{prelude::*, types::PyBytes};
 
     use crate::simd_dispatch::SimdIsa;
 
