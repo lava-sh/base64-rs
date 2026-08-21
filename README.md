@@ -72,16 +72,15 @@ poetry add base64-rs
 ## Examples
 
 ```python
-import base64-rs
+import base64_rs
 
-print(base64_rs.)
+print(base64_rs.b64encode(b"lava-sh")) # b'bGF2YS1zaA=='
 ```
 
 ## Compatibility with CPython [base64][cpython-base64]
 
 ```py
-import base64-rs as base64
-
+import base64_rs as base64
 ```
 
 ## References
