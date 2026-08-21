@@ -13,7 +13,7 @@ const BYTES_CONSUMED_PER_ROUND: usize = 12;
 const BYTES_WRITTEN_PER_ROUND: usize = 16;
 
 #[inline(always)]
-unsafe fn mulhi_epu16(mut a: __m128i, b: __m128i) -> __m128i {
+unsafe fn mm_mulhi_epu16(mut a: __m128i, b: __m128i) -> __m128i {
     // LLVM (via rustc's codegen) lowers `_mm_mulhi_epu16` into a
     // `punpcklwd`/`punpckhwd`/`psrld`/`packssdw` sequence instead of emitting
     // a single `pmulhuw`
@@ -57,7 +57,7 @@ fn reshuffle(src: __m128i) -> __m128i {
     // 0000eeee FF000000 DDDDDD00 00000000
     // 0000bbbb CC000000 AAAAAA00 00000000
 
-    let t1 = unsafe { mulhi_epu16(t0, _mm_set1_epi32(0x0400_0040)) };
+    let t1 = unsafe { mm_mulhi_epu16(t0, _mm_set1_epi32(0x0400_0040)) };
     // 00000000 00kkkkLL 00000000 00JJJJJJ
     // 00000000 00hhhhII 00000000 00GGGGGG
     // 00000000 00eeeeFF 00000000 00DDDDDD
