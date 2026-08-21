@@ -46,6 +46,7 @@ mimalloc = {
 [features]
 default = []
 mimalloc = ["dep:mimalloc"]
+android = ["pyo3/abi3-py310"]
 
 [profile.release]
 opt-level = 3
@@ -72,11 +73,11 @@ alloc_instead_of_core = "deny"
 inline_always = "allow"
 cast_ptr_alignment = "allow"
 missing_errors_doc = "allow"
-missing_const_for_fn = "allow"
 cast_possible_truncation = "allow"
 
 # maybe TODO
 too_many_lines = "allow"
+missing_const_for_fn = "allow"
 
 # TODO
 missing_safety_doc = "allow"
