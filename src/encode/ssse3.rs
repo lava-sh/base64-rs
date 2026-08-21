@@ -10,7 +10,7 @@ use pyo3::{prelude::*, types::PyBytes};
 use super::python;
 
 const BYTES_CONSUMED_PER_ROUND: usize = 12;
-const BYTES_WRITTEN_PER_ROUND: usize = 16;
+const BYTES_PRODUCED_PER_ROUND: usize = 16;
 
 #[inline(always)]
 unsafe fn mm_mulhi_epu16(mut a: __m128i, b: __m128i) -> __m128i {
@@ -174,6 +174,7 @@ unsafe fn encode_block_with_altchars(src: *const u8, dst: *mut u8, plus: __m128i
     unsafe { _mm_storeu_si128(dst.cast(), encoded) };
 }
 
+// https://github.com/aklomp/base64/blob/bf058e57/lib/arch/ssse3/enc_loop.c
 #[target_feature(enable = "ssse3")]
 pub unsafe fn encode_simd_prefix(
     mut src: *const u8,
@@ -181,32 +182,35 @@ pub unsafe fn encode_simd_prefix(
     mut dst: *mut u8,
     alphabet: *const u8,
 ) -> usize {
-    // A 12-byte group uses one 16-byte read. Leave four bytes for scalar
-    // finalization so the final vector read remains in bounds.
     if len < 16 {
         return 0;
     }
 
-    let mut blocks = (len - 4) / BYTES_CONSUMED_PER_ROUND;
-    let consumed = blocks * BYTES_CONSUMED_PER_ROUND;
+    // Process blocks of 12 bytes at a time. Because blocks are loaded 16
+    // bytes at a time, ensure that there will be at least 4 remaining
+    // bytes after the last round, so that the final read will not pass
+    // beyond the bounds of the input buffer:
+    let mut rounds = (len - 4) / BYTES_CONSUMED_PER_ROUND;
+    let consumed = rounds * BYTES_CONSUMED_PER_ROUND;
+
     let plus = unsafe { alphabet.add(62).read() };
     let slash = unsafe { alphabet.add(63).read() };
 
     if plus == b'+' && slash == b'/' {
-        while blocks != 0 {
+        while rounds != 0 {
             unsafe { encode_block(src, dst) };
             src = unsafe { src.add(BYTES_CONSUMED_PER_ROUND) };
-            dst = unsafe { dst.add(BYTES_WRITTEN_PER_ROUND) };
-            blocks -= 1;
+            dst = unsafe { dst.add(BYTES_PRODUCED_PER_ROUND) };
+            rounds -= 1;
         }
     } else {
         let plus = _mm_set1_epi8(plus.cast_signed());
         let slash = _mm_set1_epi8(slash.cast_signed());
-        while blocks != 0 {
+        while rounds != 0 {
             unsafe { encode_block_with_altchars(src, dst, plus, slash) };
             src = unsafe { src.add(BYTES_CONSUMED_PER_ROUND) };
-            dst = unsafe { dst.add(BYTES_WRITTEN_PER_ROUND) };
-            blocks -= 1;
+            dst = unsafe { dst.add(BYTES_PRODUCED_PER_ROUND) };
+            rounds -= 1;
         }
     }
 
