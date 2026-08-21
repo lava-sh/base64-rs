@@ -69,10 +69,12 @@ uv pip install base64-rs
 poetry add base64-rs
 ```
 
-## Example
+## Examples
 
 ```python
+import base64-rs
 
+print(base64_rs.)
 ```
 
 ## Compatibility with CPython [base64][cpython-base64]
@@ -81,6 +83,24 @@ poetry add base64-rs
 import base64-rs as base64
 
 ```
+
+## References
+
+### Papers
+
+* [Base64 encoding and decoding at almost the speed of a memory copy](https://arxiv.org/pdf/1910.05109)
+* [AVX512F base64 coding and decoding](http://0x80.pl/notesen/2016-09-17-avx512-foundation-base64.html)
+* [Base64 encoding & decoding using AVX512BW instructions](http://0x80.pl/notesen/2016-04-03-avx512-base64.html)
+* [Base64 encoding with SIMD instructions](http://0x80.pl/notesen/2016-01-12-sse-base64-encoding.html)
+* [Base64 decoding with SIMD instructions](http://0x80.pl/notesen/2016-01-17-sse-base64-decoding.html)
+
+### GitHub repos
+
+* [WojciechMula/base64simd](https://github.com/WojciechMula/base64simd)
+* [WojciechMula/base64-avx512](https://github.com/WojciechMula/base64-avx512)
+* [aklomp/base64](https://github.com/aklomp/base64)
+* [Nugine/simd](https://github.com/Nugine/simd)
+* [BLAKE3-team/BLAKE3](https://github.com/BLAKE3-team/BLAKE3)
 
 <div align="center">
 
