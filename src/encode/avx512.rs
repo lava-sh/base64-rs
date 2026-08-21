@@ -26,8 +26,6 @@ use super::python;
 /// `src` must be readable for 64 bytes.
 #[inline(always)]
 unsafe fn load_unaligned(src: *const u8) -> __m512i {
-    // See: https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_loadu_si512&ig_expand=4110
-    //
     // SAFETY: `_mm512_loadu_si512` accepts unaligned addresses.
     unsafe { _mm512_loadu_si512(src.cast::<__m512i>()) }
 }
@@ -39,8 +37,6 @@ unsafe fn load_unaligned(src: *const u8) -> __m512i {
 /// `dst` must be writable for 64 bytes.
 #[inline(always)]
 unsafe fn store_unaligned(dst: *mut u8, value: __m512i) {
-    // See: https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm512_storeu_si512&ig_expand=6550
-    //
     // SAFETY: `_mm512_storeu_si512` accepts unaligned addresses.
     unsafe { _mm512_storeu_si512(dst.cast::<__m512i>(), value) };
 }
