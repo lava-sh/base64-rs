@@ -191,10 +191,12 @@ pub unsafe fn encode_into(
 }
 
 #[must_use]
+#[inline(always)]
 pub const unsafe fn no_simd(_: *const u8, _: usize, _: *mut u8, _: *const u8) -> usize {
     0
 }
 
+#[inline]
 pub fn encode<'py>(
     py: Python<'py>,
     s: &Bound<'py, PyAny>,
