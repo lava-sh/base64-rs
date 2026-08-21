@@ -92,8 +92,7 @@ def test_b64encode_padded(
     *,
     padded: bool,
 ) -> None:
-    kwargs = {"altchars": altchars} if altchars else {}
     assert (
-        base64.b64encode(b, padded=padded, **kwargs) ==
-        base64_rs.b64encode(b, padded=padded, **kwargs)
+        base64.b64encode(b, altchars=altchars, padded=padded) ==
+        base64_rs.b64encode(b, altchars=altchars, padded=padded)
     )  # fmt: skip

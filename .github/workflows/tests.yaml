@@ -72,5 +72,8 @@ jobs:
       - name: "Run ty"
         run: ty check
 
+      - name: "Run mypy"
+        run: mypy
+
       - name: "Run pytest"
         run: pytest

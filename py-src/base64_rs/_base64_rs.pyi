@@ -16,13 +16,15 @@ else:
 
 ReadableBuffer: TypeAlias = Buffer
 
+# fmt: off
 def _b64encode(
     s: ReadableBuffer,
     altchars: ReadableBuffer | None = None,
     *,
     padded: builtins.bool = True,
     wrapcol: builtins.int = 0,
-) -> builtins.bytes: ...
+) -> builtins.bytes:
+    ...
 
 def _b64encode_scalar(
     s: ReadableBuffer,
@@ -30,7 +32,8 @@ def _b64encode_scalar(
     *,
     padded: builtins.bool = True,
     wrapcol: builtins.int = 0,
-) -> builtins.bytes: ...
+) -> builtins.bytes:
+    ...
 
 def _b64encode_ssse3(
     s: ReadableBuffer,
@@ -38,7 +41,8 @@ def _b64encode_ssse3(
     *,
     padded: builtins.bool = True,
     wrapcol: builtins.int = 0,
-) -> builtins.bytes: ...
+) -> builtins.bytes:
+    ...
 
 def _b64encode_avx2(
     s: ReadableBuffer,
@@ -46,7 +50,8 @@ def _b64encode_avx2(
     *,
     padded: builtins.bool = True,
     wrapcol: builtins.int = 0,
-) -> builtins.bytes: ...
+) -> builtins.bytes:
+    ...
 
 def _b64encode_avx512(
     s: ReadableBuffer,
@@ -54,7 +59,8 @@ def _b64encode_avx512(
     *,
     padded: builtins.bool = True,
     wrapcol: builtins.int = 0,
-) -> builtins.bytes: ...
+) -> builtins.bytes:
+    ...
 
 def _b64decode(
     s: builtins.str | ReadableBuffer,
@@ -64,7 +70,8 @@ def _b64decode(
     padded: builtins.bool = True,
     ignorechars: ReadableBuffer = ...,
     canonical: builtins.bool = False,
-) -> builtins.bytes: ...
+) -> builtins.bytes:
+    ...
 
 def _standard_b64encode(s: ReadableBuffer) -> builtins.bytes: ...
 def _standard_b64decode(s: builtins.str | ReadableBuffer) -> builtins.bytes: ...
@@ -73,10 +80,14 @@ def _urlsafe_b64encode(
     s: ReadableBuffer,
     *,
     padded: builtins.bool = True,
-) -> builtins.bytes: ...
+) -> builtins.bytes:
+    ...
 
 def _urlsafe_b64decode(
     s: builtins.str | ReadableBuffer,
     *,
     padded: bool = False,
-) -> builtins.bytes: ...
+) -> builtins.bytes:
+    ...
+
+# fmt: on
