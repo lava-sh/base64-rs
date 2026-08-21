@@ -24,9 +24,7 @@ _High-performance base64 encoder/decoder written in Rust🦅_
   * AVX-512F, AVX-512VBMI, AVX2
   * SSSE3, SSE4.1, SSE4.2
 
-
 * Drop-in replacement for CPython [base64][cpython-base64] (see: [below](https://github.com/lava-sh/base64-rs#compatibility-with-cpython-base64))
-
 
 ## Installation
 
