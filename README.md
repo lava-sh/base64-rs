@@ -20,10 +20,12 @@ _High-performance base64 encoder/decoder written in Rust🦅_
 
 * High-performance base64 encoder/decoder
 
-* Runtime SIMD dispatch with support for AVX-512, AVX2, SSE4.1, and SSE2 instruction sets
+* Runtime SIMD dispatch with support for:
+  * AVX-512F, AVX-512VBMI, AVX2
+  * SSSE3, SSE4.1, SSE4.2
+
 
 * Drop in replacement for CPython [base64][cpython-base64] (see: ...)
-
 
 
 ## Installation
