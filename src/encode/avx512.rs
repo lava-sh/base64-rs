@@ -10,10 +10,10 @@
 //! - Paper: <https://arxiv.org/pdf/1910.05109>
 //! - C implementation from paper: <https://github.com/WojciechMula/base64-avx512>
 //! - Another Wojciech Muła C++ lib: <https://github.com/WojciechMula/base64simd>
-use core::arch::x86_64::{
-    __m512i, _mm512_loadu_si512, _mm512_multishift_epi64_epi8, _mm512_permutexvar_epi8,
-    _mm512_storeu_si512,
-};
+#[cfg(target_arch = "x86")]
+use core::arch::x86::*;
+#[cfg(target_arch = "x86_64")]
+use core::arch::x86_64::*;
 
 use pyo3::{prelude::*, types::PyBytes};
 
