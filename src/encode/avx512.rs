@@ -1,15 +1,3 @@
-//! # References
-//!
-//! ## "Base64 encoding and decoding at almost the speed of a memory copy" paper
-//!
-//! ### Authors
-//! - Wojciech Muła
-//! - Daniel Lemire (Correspondence: Université du Québec (TELUQ), Montreal, Canada)
-//!
-//! ### Links
-//! - Paper: <https://arxiv.org/pdf/1910.05109>
-//! - C implementation from paper: <https://github.com/WojciechMula/base64-avx512>
-//! - Another Wojciech Muła C++ lib: <https://github.com/WojciechMula/base64simd>
 #![expect(clippy::wildcard_imports)]
 
 #[cfg(target_arch = "x86")]

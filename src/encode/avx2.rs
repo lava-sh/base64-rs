@@ -1,8 +1,3 @@
-//! # References
-//!
-//! ## Links
-//! - aklomp/base64: <https://github.com/aklomp/base64/tree/master/lib/arch/avx2>
-//! - Nugine/simd: <https://github.com/Nugine/simd/tree/main/crates/base64-simd>
 #![expect(clippy::wildcard_imports)]
 
 #[cfg(target_arch = "x86")]
