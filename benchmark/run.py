@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 import argparse
 import base64
 import os
@@ -84,7 +85,7 @@ def run_benchmark(
 def run_basic(runs: int) -> None:
     run_benchmark(
         runs,
-        "Basic",
+        "Basic: b64encode(b'hello world')",
         [
             ("std", base64.b64encode),
             ("pybase64", pybase64.b64encode),
@@ -97,15 +98,12 @@ def run_basic(runs: int) -> None:
 def run_with_altchars(runs: int) -> None:
     run_benchmark(
         runs,
-        "With altchars",
+        "With altchars: b64encode(b'hello world', altchars=b'-_')",
         [
-            ("std", lambda data: base64.b64encode(data, altchars=b"-_")),
-            ("pybase64", lambda data: pybase64.b64encode(data, altchars=b"-_")),
-            ("base64_rs", lambda data: base64_rs.b64encode(data, altchars=b"-_")),
-            (
-                "base64_rs (no simd)",
-                lambda data: base64_rs._b64encode_scalar(data, altchars=b"-_"),
-            ),
+            ("std", lambda b: base64.b64encode(b, altchars=b"-_")),
+            ("pybase64", lambda b: pybase64.b64encode(b, altchars=b"-_")),
+            ("base64_rs", lambda b: base64_rs.b64encode(b, altchars=b"-_")),
+            ("base64_rs (no simd)", lambda b: base64_rs._b64encode_scalar(b, altchars=b"-_")),
         ],
     )
 
@@ -113,13 +111,12 @@ def run_with_altchars(runs: int) -> None:
 def run_with_padded(runs: int) -> None:
     run_benchmark(
         runs,
-        "With padded=False",
+        "With padded=False: b64encode(b'hello world', padded=False)",
         [
-            ("base64_rs", lambda data: base64_rs.b64encode(data, padded=False)),
-            (
-                "base64_rs (no simd)",
-                lambda data: base64_rs._b64encode_scalar(data, padded=False),
-            ),
+            ("std", lambda b: base64.b64encode(b, padded=False)),
+            ("pybase64", lambda b: pybase64.b64encode(b, padded=False)),
+            ("base64_rs", lambda b: base64_rs.b64encode(b, padded=False)),
+            ("base64_rs (no simd)", lambda b: base64_rs._b64encode_scalar(b, padded=False)),
         ],
     )
 
@@ -127,13 +124,12 @@ def run_with_padded(runs: int) -> None:
 def run_with_wrapcol(runs: int) -> None:
     run_benchmark(
         runs,
-        "With wrapcol=76",
+        "With wrapcol=76: b64encode(b'hello world', wrapcol=76)",
         [
-            ("base64_rs", lambda data: base64_rs.b64encode(data, wrapcol=76)),
-            (
-                "base64_rs (no simd)",
-                lambda data: base64_rs._b64encode_scalar(data, wrapcol=76),
-            ),
+            ("std", lambda b: base64.b64encode(b, wrapcol=76)),
+            ("pybase64", lambda b: pybase64.b64encode(b, wrapcol=76)),
+            ("base64_rs", lambda b: base64_rs.b64encode(b, wrapcol=76)),
+            ("base64_rs (no simd)", lambda b: base64_rs._b64encode_scalar(b, wrapcol=76)),
         ],
     )
 
@@ -150,7 +146,7 @@ def main() -> None:
             "with_wrapcol",
             "full",
         ],
-        default="basic",
+        default="full",
     )
     args = parser.parse_args()
 
