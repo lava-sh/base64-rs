@@ -12,7 +12,7 @@ const BYTES_PRODUCED_PER_ROUND: usize = 64;
 
 // https://github.com/aklomp/base64/blob/bf058e57/lib/arch/neon32/enc_reshuffle.c
 #[inline]
-#[target_feature(enable = "neon")]
+#[target_feature(enable = "neon,v7")]
 fn reshuffle(
     src: (uint8x16_t, uint8x16_t, uint8x16_t),
 ) -> (uint8x16_t, uint8x16_t, uint8x16_t, uint8x16_t) {
@@ -44,8 +44,8 @@ fn reshuffle(
 }
 
 // https://github.com/aklomp/base64/blob/bf058e57/lib/arch/neon32/codec.c
-#[inline(always)]
-#[target_feature(enable = "neon")]
+#[inline]
+#[target_feature(enable = "neon,v7")]
 fn vqtbl1q_u8(lut: uint8x16_t, indices: uint8x16_t) -> uint8x16_t {
     // NEON32 only supports 64-bit wide lookups in 128-bit tables. Emulate
     // the NEON64 `vqtbl1q_u8` intrinsic to do 128-bit wide lookups.
@@ -58,7 +58,7 @@ fn vqtbl1q_u8(lut: uint8x16_t, indices: uint8x16_t) -> uint8x16_t {
 
 // https://github.com/aklomp/base64/blob/bf058e57/lib/arch/neon32/enc_translate.c
 #[inline]
-#[target_feature(enable = "neon")]
+#[target_feature(enable = "neon,v7")]
 unsafe fn translate(
     src: (uint8x16_t, uint8x16_t, uint8x16_t, uint8x16_t),
 ) -> (uint8x16_t, uint8x16_t, uint8x16_t, uint8x16_t) {
@@ -110,7 +110,7 @@ unsafe fn translate(
 }
 
 #[inline]
-#[target_feature(enable = "neon")]
+#[target_feature(enable = "neon,v7")]
 unsafe fn encode_block(src: *const u8, dst: *mut u8) {
     // Load 48 bytes and deinterleave:
     let src = unsafe { vld3q_u8(src) };
@@ -125,7 +125,7 @@ unsafe fn encode_block(src: *const u8, dst: *mut u8) {
     unsafe { vst4q_u8(dst, uint8x16x4_t(out.0, out.1, out.2, out.3)) };
 }
 
-#[target_feature(enable = "neon")]
+#[target_feature(enable = "neon,v7")]
 pub unsafe fn encode_simd_prefix(
     mut src: *const u8,
     len: usize,
