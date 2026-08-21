@@ -25,7 +25,7 @@ _High-performance base64 encoder/decoder written in Rust🦅_
   * SSSE3, SSE4.1, SSE4.2
 
 
-* Drop in replacement for CPython [base64][cpython-base64] (see: ...)
+* Drop-in replacement for CPython 3.15+ [base64][cpython-base64] (see: [below](https://github.com/lava-sh/base64-rs#compatibility-with-cpython-3.15+-base64))
 
 
 ## Installation
@@ -77,7 +77,7 @@ import base64_rs
 print(base64_rs.b64encode(b"lava-sh")) # b'bGF2YS1zaA=='
 ```
 
-## Compatibility with CPython [base64][cpython-base64]
+## Compatibility with CPython 3.15+ [base64][cpython-base64]
 
 ```py
 import base64_rs as base64
