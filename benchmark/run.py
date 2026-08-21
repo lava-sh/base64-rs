@@ -13,19 +13,16 @@ from rich.table import Table
 from rich.text import Text
 
 ByteSizes = [
-    1,
-    512,
-    1024,
-    32 * 1024,
-    64 * 1024,
-    256 * 1024,
-    512 * 1024,
-    1024 * 1024,
+    1_000,
+    512_000,
+    1_000_000,
+    32_000_000,
+    64_000_000,
+    256_000_000,
+    512_000_000,
+    1_000_000_000,
+    2_500_000_000,
 ]
-
-
-def generate_rand_bytes(size_kb: int) -> bytes:
-    return os.urandom(size_kb * 1024)
 
 
 def bench(func: Callable[[bytes], bytes], data: bytes, runs: int) -> float:
@@ -58,13 +55,18 @@ def run_benchmark(
     table = create_table(["Size", *(name for name, _ in fns)])
 
     for size in ByteSizes:
-        data = generate_rand_bytes(size)
+        data = os.urandom(size)
         results = [bench(func, data, runs) for _, func in fns]
 
         baseline = results[0]
         fastest = min(results)
 
-        size_str = f"{size // 1024}MB" if size >= 1024 else f"{size}KB"
+        if size >= 1_000_000_000:
+            size_str = f"{size / 1_000_000_000:g}GB"
+        elif size >= 1_000_000:
+            size_str = f"{size / 1_000_000:g}MB"
+        else:
+            size_str = f"{size / 1_000:g}KB"
 
         row = [size_str]
 
