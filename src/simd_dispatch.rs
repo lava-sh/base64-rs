@@ -31,7 +31,7 @@ impl SimdIsa {
                     return Self::Avx2;
                 }
             }
-            // `SS*` instruction set hierarchy:
+            // `SSE*` instruction set hierarchy:
             // SSE2
             //  └─ SSE3
             //      └─ SSSE3
