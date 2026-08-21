@@ -11,8 +11,10 @@ pub enum SimdIsa {
     Avx2 = 3,
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     Avx512 = 4,
-    #[cfg(target_arch = "aarch64")]
-    Neon = 5,
+    #[cfg(target_arch = "arm")]
+    Neon32 = 5,
+    #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
+    Neon64 = 6,
 }
 
 impl SimdIsa {
@@ -43,12 +45,18 @@ impl SimdIsa {
                 return Self::Ssse3;
             }
         }
-
-        #[cfg(target_arch = "aarch64")]
+        #[cfg(target_arch = "arm")]
         {
-            // https://developer.arm.com/architectures/instruction-sets/intrinsics/#f:@navigationhierarchiessimdisa=[Neon]
+            // https://developer.arm.com/architectures/instruction-sets/intrinsics
+            if std::arch::is_arm_feature_detected!("neon") {
+                return Self::Neon32;
+            }
+        }
+        #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
+        {
+            // // https://developer.arm.com/architectures/instruction-sets/intrinsics
             if std::arch::is_aarch64_feature_detected!("neon") {
-                return Self::Neon;
+                return Self::Neon64;
             }
         }
 
