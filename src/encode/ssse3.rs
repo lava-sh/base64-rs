@@ -1,4 +1,4 @@
-#![expect(clippy::wildcard_imports)]
+#![allow(clippy::wildcard_imports)]
 
 use core::arch::asm;
 #[cfg(target_arch = "x86")]
