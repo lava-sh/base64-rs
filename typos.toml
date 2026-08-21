@@ -1,2 +1,7 @@
 [default.extend-words]
-
+# error: `CPY` should be `COPY`, `CPU`
+#   --> .\ruff.toml:29:6
+#    |
+# 29 |     "CPY001",  # Check copyright notices within Python files
+#    |      ^^^
+CPY = "CPY"
