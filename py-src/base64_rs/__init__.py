@@ -1,5 +1,3 @@
-# ruff: noqa: RUF067
-
 __all__ = (
     "__version__",
     "_b64encode_scalar",
@@ -16,7 +14,7 @@ from ._base64_rs import (
     _urlsafe_b64encode as urlsafe_b64encode,
 )
 
-try:
+try:  # noqa: RUF067
     from ._base64_rs import (
         _b64encode_avx2,
         _b64encode_avx512,
@@ -25,7 +23,7 @@ try:
 except ImportError:
     pass
 else:
-    __all__ += (
+    __all__ += (  # type: ignore[assignment]
         "_b64encode_avx2",
         "_b64encode_avx512",
         "_b64encode_ssse3",
