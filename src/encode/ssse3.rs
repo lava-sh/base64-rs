@@ -1,3 +1,8 @@
+//! # References
+//!
+//! ## Links
+//! - aklomp/base64: <https://github.com/aklomp/base64/tree/master/lib/arch/ssse3>
+//! - Nugine/simd: <https://github.com/Nugine/simd/tree/main/crates/base64-simd>
 use core::arch::asm;
 #[cfg(target_arch = "x86")]
 use core::arch::x86 as arch;

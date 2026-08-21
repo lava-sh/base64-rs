@@ -1,3 +1,8 @@
+//! # References
+//!
+//! ## Links
+//! - aklomp/base64: <https://github.com/aklomp/base64/tree/master/lib/arch/avx2>
+//! - Nugine/simd: <https://github.com/Nugine/simd/tree/main/crates/base64-simd>
 use core::arch::x86_64::{
     __m256i, _mm256_add_epi8, _mm256_and_si256, _mm256_andnot_si256, _mm256_cmpeq_epi8,
     _mm256_cmpgt_epi8, _mm256_loadu_si256, _mm256_mulhi_epu16, _mm256_mullo_epi16, _mm256_or_si256,
