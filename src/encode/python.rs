@@ -60,16 +60,13 @@ pub fn encode<'py>(
     altchars: Option<&Bound<'py, PyAny>>,
     padded: bool,
     wrapcol: isize,
-    bulk_encode: Fn,
+    encode_impl: Fn,
 ) -> PyResult<Bound<'py, PyBytes>> {
     if wrapcol < 0 {
         return Err(PyValueError::new_err("wrapcol must be >= 0"));
     }
 
-    let input = get_buffer(py, s)?;
-    let mut alphabet = Alphabet::Standard.table().0;
-
-    let kind = if let Some(altchars) = altchars {
+    let altchars = if let Some(altchars) = altchars {
         let buf = get_buffer(py, altchars)?;
         if buf.0.len != 2 {
             return Err(PyValueError::new_err(format!(
@@ -78,14 +75,36 @@ pub fn encode<'py>(
         }
         // buffer is C-contiguous and has exactly two bytes.
         let altchars = buf.0.buf.cast::<u8>();
-        let suffix = unsafe { [altchars.read(), altchars.add(1).read()] };
-        alphabet[62..].copy_from_slice(&suffix);
-        Alphabet::from_altchars(suffix)
+        Some(unsafe { [altchars.read(), altchars.add(1).read()] })
     } else {
-        Some(Alphabet::Standard)
+        None
     };
 
-    let wrapcol = wrapcol.cast_unsigned();
+    encode_with_altchars(
+        py,
+        s,
+        altchars,
+        padded,
+        wrapcol.cast_unsigned(),
+        encode_impl,
+    )
+}
+
+fn encode_with_altchars<'py>(
+    py: Python<'py>,
+    s: &Bound<'py, PyAny>,
+    altchars: Option<[u8; 2]>,
+    padded: bool,
+    wrapcol: usize,
+    encode_impl: Fn,
+) -> PyResult<Bound<'py, PyBytes>> {
+    let input = get_buffer(py, s)?;
+    let mut alphabet = Alphabet::Standard.table().0;
+    let kind = altchars.map_or(Some(Alphabet::Standard), |suffix| {
+        alphabet[62..].copy_from_slice(&suffix);
+        Alphabet::from_altchars(suffix)
+    });
+
     let input_len = input.0.len.cast_unsigned();
     let output_len = encoded_len(input_len, padded, wrapcol)
         .ok_or_else(|| PyMemoryError::new_err("encoded data is too large"))?;
@@ -105,7 +124,7 @@ pub fn encode<'py>(
     let input = input.0.buf.cast::<u8>();
     py.detach(move || {
         let consumed = if wrapcol == 0 {
-            unsafe { bulk_encode(input, input_len, output, alphabet.as_ptr()) }
+            unsafe { encode_impl(input, input_len, output, alphabet.as_ptr()) }
         } else {
             0
         };
@@ -131,4 +150,13 @@ pub fn encode<'py>(
         };
     });
     Ok(unsafe { Bound::from_owned_ptr(py, result).cast_into_unchecked() })
+}
+
+pub fn encode_urlsafe<'py>(
+    py: Python<'py>,
+    s: &Bound<'py, PyAny>,
+    padded: bool,
+    encode_impl: Fn,
+) -> PyResult<Bound<'py, PyBytes>> {
+    encode_with_altchars(py, s, Some(*b"-_"), padded, 0, encode_impl)
 }

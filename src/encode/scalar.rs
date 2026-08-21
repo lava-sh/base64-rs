@@ -190,7 +190,8 @@ pub unsafe fn encode_into(
     written
 }
 
-const unsafe fn no_simd(_: *const u8, _: usize, _: *mut u8, _: *const u8) -> usize {
+#[must_use]
+pub const unsafe fn no_simd(_: *const u8, _: usize, _: *mut u8, _: *const u8) -> usize {
     0
 }
 

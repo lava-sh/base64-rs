@@ -124,4 +124,54 @@ mod base64_rs {
         // SAFETY: the cached runtime ISA check above.
         unsafe { crate::encode::avx512::encode(py, s, altchars, padded, wrapcol) }
     }
+
+    #[pyfunction(name = "_standard_b64encode", signature = (s))]
+    fn standard_b64encode<'py>(
+        py: Python<'py>,
+        s: &Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyBytes>> {
+        match SimdIsa::detected() {
+            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            SimdIsa::Avx512 => unsafe { crate::encode::avx512::encode(py, s, None, true, 0) },
+            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            SimdIsa::Avx2 => unsafe { crate::encode::avx2::encode(py, s, None, true, 0) },
+            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            SimdIsa::Ssse3 => unsafe { crate::encode::ssse3::encode(py, s, None, true, 0) },
+            _ => crate::encode::scalar::encode(py, s, None, true, 0),
+        }
+    }
+
+    #[pyfunction(name = "_urlsafe_b64encode", signature = (s, *, padded = true))]
+    fn urlsafe_b64encode<'py>(
+        py: Python<'py>,
+        s: &Bound<'py, PyAny>,
+        padded: bool,
+    ) -> PyResult<Bound<'py, PyBytes>> {
+        match SimdIsa::detected() {
+            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            SimdIsa::Avx512 => crate::encode::python::encode_urlsafe(
+                py,
+                s,
+                padded,
+                crate::encode::avx512::encode_simd_prefix,
+            ),
+            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            SimdIsa::Avx2 => crate::encode::python::encode_urlsafe(
+                py,
+                s,
+                padded,
+                crate::encode::avx2::encode_simd_prefix,
+            ),
+            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            SimdIsa::Ssse3 => crate::encode::python::encode_urlsafe(
+                py,
+                s,
+                padded,
+                crate::encode::ssse3::encode_simd_prefix,
+            ),
+            _ => {
+                crate::encode::python::encode_urlsafe(py, s, padded, crate::encode::scalar::no_simd)
+            }
+        }
+    }
 }
