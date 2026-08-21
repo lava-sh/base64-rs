@@ -16,6 +16,7 @@ from ._base64_rs import (
 
 try:  # noqa: RUF067
     from ._base64_rs import (
+        _b64encode_avx,
         _b64encode_avx2,
         _b64encode_avx512,
         _b64encode_ssse3,
@@ -24,6 +25,7 @@ except ImportError:
     pass
 else:
     __all__ += (  # type: ignore[assignment]
+        "_b64encode_avx",
         "_b64encode_avx2",
         "_b64encode_avx512",
         "_b64encode_ssse3",

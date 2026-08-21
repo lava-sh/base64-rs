@@ -26,16 +26,7 @@ def _b64encode(
 ) -> builtins.bytes:
     ...
 
-def _b64encode_scalar(
-    s: ReadableBuffer,
-    altchars: ReadableBuffer | None = None,
-    *,
-    padded: builtins.bool = True,
-    wrapcol: builtins.int = 0,
-) -> builtins.bytes:
-    ...
-
-def _b64encode_ssse3(
+def _b64encode_avx512(
     s: ReadableBuffer,
     altchars: ReadableBuffer | None = None,
     *,
@@ -53,7 +44,25 @@ def _b64encode_avx2(
 ) -> builtins.bytes:
     ...
 
-def _b64encode_avx512(
+def _b64encode_avx(
+    s: ReadableBuffer,
+    altchars: ReadableBuffer | None = None,
+    *,
+    padded: builtins.bool = True,
+    wrapcol: builtins.int = 0,
+) -> builtins.bytes:
+    ...
+
+def _b64encode_ssse3(
+    s: ReadableBuffer,
+    altchars: ReadableBuffer | None = None,
+    *,
+    padded: builtins.bool = True,
+    wrapcol: builtins.int = 0,
+) -> builtins.bytes:
+    ...
+
+def _b64encode_scalar(
     s: ReadableBuffer,
     altchars: ReadableBuffer | None = None,
     *,
