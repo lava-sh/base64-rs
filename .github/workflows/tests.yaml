@@ -74,9 +74,7 @@ jobs:
 
       - name: "Run mypy"
         # ERROR: Running mypy on PyPy is not supported yet.
-        # To type-check a PyPy library please use an equivalent CPython version,
-        # see https://github.com/mypyc/librt/issues/16 for possible workarounds.
-        if: !startsWith(matrix.python-version, 'pypy')
+        if: ${{ !startsWith(matrix.python-version, 'pypy') }}
         run: mypy
 
       - name: "Run pytest"
