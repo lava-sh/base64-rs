@@ -66,10 +66,10 @@ jobs:
             command: zizmor .github/
 
           - name: "typos"
-            command: typos --config .typos.toml
+            command: typos
 
           - name: "rumdl"
-            command: rumdl check .
+            command: rumdl check
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
