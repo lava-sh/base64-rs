@@ -21,7 +21,7 @@ ALPHABET = (
         b"\x00\x01x00\x01",
     ],
 )
-def test_invalid_altchars(altchars: bytes) -> None:
+def test_invalid_altchars(altchars: base64_rs._base64_rs.ReadableBuffer) -> None:
     with pytest.raises(ValueError, match="invalid altchars:"):
         base64.b64encode(b"lava-sh", altchars)
 
@@ -46,7 +46,7 @@ def test_invalid_wrapcol() -> None:
         ALPHABET,
     ],
 )  # fmt: skip
-def test_b64encode(b: bytes) -> None:
+def test_b64encode(b: base64_rs._base64_rs.ReadableBuffer) -> None:
     assert base64.b64encode(b) == base64_rs.b64encode(b)
 
 
@@ -67,4 +67,33 @@ def test_b64encode_with_altchars(altchars: base64_rs._base64_rs.ReadableBuffer) 
     assert (
         base64.b64encode(data, altchars=altchars) ==
         base64_rs.b64encode(data, altchars=altchars)
+    )  # fmt: skip
+
+
+@pytest.mark.skipif(sys.version_info < (3, 15), reason="requires CPython 3.15+")
+@pytest.mark.parametrize(
+    ("b", "altchars"),
+    [
+        (b"", None),
+        (b"a", None),
+        (b"ab", None),
+        (b"abc", None),
+        (b"\xfb", b"-_"),
+        (b"\xfb\xff", b"-_"),
+        (b"\xfb\xff\xbf", b"-_"),
+        (ALPHABET, None),
+        (b"lava-sh", None),
+    ],
+)
+@pytest.mark.parametrize("padded", [True, False])
+def test_b64encode_padded(
+    b: base64_rs._base64_rs.ReadableBuffer,
+    altchars: base64_rs._base64_rs.ReadableBuffer | None,
+    *,
+    padded: bool,
+) -> None:
+    kwargs = {"altchars": altchars} if altchars else {}
+    assert (
+        base64.b64encode(b, padded=padded, **kwargs) ==
+        base64_rs.b64encode(b, padded=padded, **kwargs)
     )  # fmt: skip
