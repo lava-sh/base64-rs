@@ -57,7 +57,10 @@ wasm-test = [
     "pytest-httpserver == 1.1.5",
 ]
 ci = [
-    "mypy == 2.3.1",
+    # Running mypy on PyPy is not supported yet.
+    "mypy == 2.3.1 ; implementation_name != 'pypy'",
+    # `collections.abc.Buffer` added in version 3.12.
+    "typing-extensions == 4.16.0 ; python_version < '3.12'",
     "ty == 0.0.73",
     "ruff == 0.16.4",
     { include-group = "pytest" },

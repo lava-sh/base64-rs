@@ -5,6 +5,8 @@ import sys
 import base64_rs
 import pytest
 
+from .helpers import ReadableBuffer
+
 ALPHABET = (
     b"abcdefghijklmnopqrstuvwxyz"
     b"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -21,7 +23,7 @@ ALPHABET = (
         b"\x00\x01x00\x01",
     ],
 )
-def test_invalid_altchars(altchars: base64_rs._base64_rs.ReadableBuffer) -> None:
+def test_invalid_altchars(altchars: ReadableBuffer) -> None:
     with pytest.raises(ValueError, match="invalid altchars:"):
         base64.b64encode(b"lava-sh", altchars)
 
@@ -46,7 +48,7 @@ def test_invalid_wrapcol() -> None:
         ALPHABET,
     ],
 )  # fmt: skip
-def test_b64encode(b: base64_rs._base64_rs.ReadableBuffer) -> None:
+def test_b64encode(b: ReadableBuffer) -> None:
     assert base64.b64encode(b) == base64_rs.b64encode(b)
 
 
@@ -59,7 +61,7 @@ def test_b64encode(b: base64_rs._base64_rs.ReadableBuffer) -> None:
         array.array("B", b"*$"),
     ],
 )
-def test_b64encode_with_altchars(altchars: base64_rs._base64_rs.ReadableBuffer) -> None:
+def test_b64encode_with_altchars(altchars: ReadableBuffer) -> None:
     data = b"\xd3V\xbeo\xf7\x1d"
     expected = b"01a*b$cd"
 
@@ -87,8 +89,8 @@ def test_b64encode_with_altchars(altchars: base64_rs._base64_rs.ReadableBuffer) 
 )
 @pytest.mark.parametrize("padded", [True, False])
 def test_b64encode_padded(
-    b: base64_rs._base64_rs.ReadableBuffer,
-    altchars: base64_rs._base64_rs.ReadableBuffer | None,
+    b: ReadableBuffer,
+    altchars: ReadableBuffer | None,
     *,
     padded: bool,
 ) -> None:
