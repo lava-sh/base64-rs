@@ -85,7 +85,9 @@ without changing call sites.
 ```py
 import base64_rs as base64
 
-print(base64.b64encode(b"lava-sh")) # b'bGF2YS1zaA=='
+print(base64.b64encode(b"lava-sh"))           # b'bGF2YS1zaA=='
+print(base64.standard_b64encode(b"\xfb\xff")) # b'+/8='
+print(base64.urlsafe_b64encode(b"\xfb\xff"))  # b'-_8='
 ```
 
 ## References
