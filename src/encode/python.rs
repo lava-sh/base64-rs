@@ -98,15 +98,16 @@ fn encode_with_altchars<'py>(
     wrapcol: usize,
     encode_impl: Fn,
 ) -> PyResult<Bound<'py, PyBytes>> {
-    let input = get_buffer(py, s)?;
+    let buf = get_buffer(py, s)?;
+
     let mut alphabet = Alphabet::Standard.table().0;
     let kind = altchars.map_or(Some(Alphabet::Standard), |suffix| {
         alphabet[62..].copy_from_slice(&suffix);
         Alphabet::from_altchars(suffix)
     });
 
-    let input_len = input.0.len.cast_unsigned();
-    let output_len = encoded_len(input_len, padded, wrapcol)
+    let buf_len = buf.0.len.cast_unsigned();
+    let output_len = encoded_len(buf_len, padded, wrapcol)
         .ok_or_else(|| PyMemoryError::new_err("encoded data is too large"))?;
 
     if output_len > ffi::PY_SSIZE_T_MAX as usize {
@@ -115,28 +116,34 @@ fn encode_with_altchars<'py>(
 
     let pairs = kind.map(Alphabet::pairs);
 
-    let result =
+    let py_bytes =
         unsafe { ffi::PyBytes_FromStringAndSize(core::ptr::null(), output_len.cast_signed()) };
-    if result.is_null() {
+
+    if py_bytes.is_null() {
         return Err(PyErr::fetch(py));
     }
-    let output = unsafe { ffi::PyBytes_AS_STRING(result).cast_mut().cast::<u8>() };
-    let input = input.0.buf.cast::<u8>();
+
+    let output = unsafe { ffi::PyBytes_AS_STRING(py_bytes).cast_mut().cast::<u8>() };
+    let input = buf.0.buf.cast::<u8>();
+
     py.detach(move || {
         let consumed = if wrapcol == 0 {
-            unsafe { encode_impl(input, input_len, output, alphabet.as_ptr()) }
+            unsafe { encode_impl(input, buf_len, output, alphabet.as_ptr()) }
         } else {
             0
         };
         let input = unsafe { input.add(consumed) };
         let output = unsafe { output.add(consumed / 3 * 4) };
-        let input_len = input_len - consumed;
-        let custom_pairs = (pairs.is_none() && input_len >= PAIR_TABLE_MIN_INPUT)
+        let input_len = buf_len - consumed;
+
+        let runtime_pairs = (pairs.is_none() && input_len >= PAIR_TABLE_MIN_INPUT)
             .then(|| scalar::encode_pairs(&alphabet));
-        let pairs = custom_pairs.as_ref().map_or_else(
+
+        let pairs = runtime_pairs.as_ref().map_or_else(
             || pairs.unwrap_or(core::ptr::null()),
             |pairs| pairs.as_ptr(),
         );
+
         unsafe {
             scalar::encode_into(
                 input,
@@ -149,7 +156,7 @@ fn encode_with_altchars<'py>(
             )
         };
     });
-    Ok(unsafe { Bound::from_owned_ptr(py, result).cast_into_unchecked() })
+    Ok(unsafe { Bound::from_owned_ptr(py, py_bytes).cast_into_unchecked() })
 }
 
 pub fn encode_urlsafe<'py>(
