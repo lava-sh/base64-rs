@@ -10,6 +10,8 @@
 //! - Paper: <https://arxiv.org/pdf/1910.05109>
 //! - C implementation from paper: <https://github.com/WojciechMula/base64-avx512>
 //! - Another Wojciech Muła C++ lib: <https://github.com/WojciechMula/base64simd>
+#![expect(clippy::wildcard_imports)]
+
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
