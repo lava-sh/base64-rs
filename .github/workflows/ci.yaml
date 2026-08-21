@@ -137,11 +137,12 @@ jobs:
     needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
     uses: ./.github/workflows/macos.yaml
 
-  wasm:
-    if: ${{ always() && !failure() && !cancelled() }}
-
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
-    uses: ./.github/workflows/wasm.yaml
+  # Maybe TODO
+  #wasm:
+  # if: ${{ always() && !failure() && !cancelled() }}
+  #
+  # needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+  # uses: ./.github/workflows/wasm.yaml
 
   build-sdist:
     name: "build sdist"
@@ -174,7 +175,7 @@ jobs:
       musllinux,
       windows,
       macos,
-      wasm,
+      # wasm,
     ]
     environment: pypi
     permissions:
