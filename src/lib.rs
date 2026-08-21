@@ -30,11 +30,11 @@ mod base64_rs {
         wrapcol: isize,
     ) -> PyResult<Bound<'py, PyBytes>> {
         match SimdIsa::detected() {
-            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            #[cfg(target_arch = "x86_64")]
             SimdIsa::Avx512 => unsafe {
                 crate::encode::avx512::encode(py, s, altchars, padded, wrapcol)
             },
-            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            #[cfg(target_arch = "x86_64")]
             SimdIsa::Avx2 => unsafe {
                 crate::encode::avx2::encode(py, s, altchars, padded, wrapcol)
             },
@@ -60,7 +60,7 @@ mod base64_rs {
         crate::encode::scalar::encode(py, s, altchars, padded, wrapcol)
     }
 
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    #[cfg(target_arch = "x86_64")]
     #[pyfunction(
         name = "_b64encode_avx2",
         signature = (s, altchars = None, *, padded = true, wrapcol = 0)
@@ -91,10 +91,14 @@ mod base64_rs {
         padded: bool,
         wrapcol: isize,
     ) -> PyResult<Bound<'py, PyBytes>> {
-        if !matches!(
+        #[cfg(target_arch = "x86")]
+        let supported = SimdIsa::detected() == SimdIsa::Ssse3;
+        #[cfg(target_arch = "x86_64")]
+        let supported = matches!(
             SimdIsa::detected(),
             SimdIsa::Ssse3 | SimdIsa::Avx2 | SimdIsa::Avx512
-        ) {
+        );
+        if !supported {
             return Err(PyRuntimeError::new_err(
                 "SSSE3 is not supported by this CPU",
             ));
@@ -103,7 +107,7 @@ mod base64_rs {
         unsafe { crate::encode::ssse3::encode(py, s, altchars, padded, wrapcol) }
     }
 
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    #[cfg(target_arch = "x86_64")]
     #[pyfunction(
         name = "_b64encode_avx512",
         signature = (s, altchars = None, *, padded = true, wrapcol = 0)

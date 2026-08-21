@@ -7,9 +7,9 @@ pub enum SimdIsa {
     Scalar = 0,
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     Ssse3 = 1,
-    #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+    #[cfg(target_arch = "x86_64")]
     Avx2 = 3,
-    #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+    #[cfg(target_arch = "x86_64")]
     Avx512 = 4,
     #[cfg(target_arch = "aarch64")]
     Neon = 5,
@@ -20,13 +20,16 @@ impl SimdIsa {
     fn detect() -> Self {
         #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
         {
-            // https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#avx512techs=AVX512_VBMI
-            if is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("avx512vbmi") {
-                return Self::Avx512;
-            }
-            // https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#avxnewtechs=AVX2
-            if is_x86_feature_detected!("avx2") {
-                return Self::Avx2;
+            #[cfg(target_arch = "x86_64")]
+            {
+                // https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#avx512techs=AVX512_VBMI
+                if is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("avx512vbmi") {
+                    return Self::Avx512;
+                }
+                // https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#avxnewtechs=AVX2
+                if is_x86_feature_detected!("avx2") {
+                    return Self::Avx2;
+                }
             }
             // `SS*` instruction set hierarchy:
             // SSE2
