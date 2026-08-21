@@ -92,7 +92,7 @@ def run_basic(runs: int) -> None:
             ("base64_rs", base64_rs.b64encode),
             ("base64_rs (no simd)", base64_rs._b64encode_scalar),
         ],
-    )
+    )  # fmt: skip
 
 
 def run_with_altchars(runs: int) -> None:
@@ -105,7 +105,7 @@ def run_with_altchars(runs: int) -> None:
             ("base64_rs", lambda b: base64_rs.b64encode(b, altchars=b"-_")),
             ("base64_rs (no simd)", lambda b: base64_rs._b64encode_scalar(b, altchars=b"-_")),
         ],
-    )
+    )  # fmt: skip
 
 
 def run_with_padded(runs: int) -> None:
@@ -118,7 +118,7 @@ def run_with_padded(runs: int) -> None:
             ("base64_rs", lambda b: base64_rs.b64encode(b, padded=False)),
             ("base64_rs (no simd)", lambda b: base64_rs._b64encode_scalar(b, padded=False)),
         ],
-    )
+    )  # fmt: skip
 
 
 def run_with_wrapcol(runs: int) -> None:
@@ -131,7 +131,7 @@ def run_with_wrapcol(runs: int) -> None:
             ("base64_rs", lambda b: base64_rs.b64encode(b, wrapcol=76)),
             ("base64_rs (no simd)", lambda b: base64_rs._b64encode_scalar(b, wrapcol=76)),
         ],
-    )
+    )  # fmt: skip
 
 
 def main() -> None:
