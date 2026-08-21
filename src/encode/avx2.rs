@@ -60,7 +60,7 @@ fn reshuffle(src: __m256i) -> __m256i {
     // e f d e
     // b c a b
 
-    let t0 = _mm256_and_si256(src, _mm256_set1_epi32(0x0FC0FC00));
+    let t0 = _mm256_and_si256(src, _mm256_set1_epi32(0x0FC0_FC00));
     // bits, upper case are most significant bits, lower case are least
     // significant bits.
     // 0000wwww XX000000 VVVVVV00 00000000
@@ -72,7 +72,7 @@ fn reshuffle(src: __m256i) -> __m256i {
     // 0000eeee FF000000 DDDDDD00 00000000
     // 0000bbbb CC000000 AAAAAA00 00000000
 
-    let t1 = unsafe { mm256_mulhi_epu16(t0, _mm256_set1_epi32(0x04000040)) };
+    let t1 = unsafe { mm256_mulhi_epu16(t0, _mm256_set1_epi32(0x0400_0040)) };
     // 00000000 00wwwwXX 00000000 00VVVVVV
     // 00000000 00ttttUU 00000000 00SSSSSS
     // 00000000 00qqqqRR 00000000 00PPPPPP
@@ -82,7 +82,7 @@ fn reshuffle(src: __m256i) -> __m256i {
     // 00000000 00eeeeFF 00000000 00DDDDDD
     // 00000000 00bbbbCC 00000000 00AAAAAA
 
-    let t2 = _mm256_and_si256(src, _mm256_set1_epi32(0x003F03F0));
+    let t2 = _mm256_and_si256(src, _mm256_set1_epi32(0x003F_03F0));
     // 00000000 00xxxxxx 000000vv WWWW0000
     // 00000000 00uuuuuu 000000ss TTTT0000
     // 00000000 00rrrrrr 000000pp QQQQ0000
@@ -92,7 +92,7 @@ fn reshuffle(src: __m256i) -> __m256i {
     // 00000000 00ffffff 000000dd EEEE0000
     // 00000000 00cccccc 000000aa BBBB0000
 
-    let t3 = _mm256_mullo_epi16(t2, _mm256_set1_epi32(0x01000010));
+    let t3 = _mm256_mullo_epi16(t2, _mm256_set1_epi32(0x0100_0010));
     // 00xxxxxx 00000000 00vvWWWW 00000000
     // 00uuuuuu 00000000 00ssTTTT 00000000
     // 00rrrrrr 00000000 00ppQQQQ 00000000
