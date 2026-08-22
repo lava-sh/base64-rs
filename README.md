@@ -103,11 +103,12 @@ print(base64.urlsafe_b64encode(b"\xfb\xff"))  # b'-_8='
 
 ### GitHub repos
 
-* [WojciechMula/base64simd](https://github.com/WojciechMula/base64simd)
-* [WojciechMula/base64-avx512](https://github.com/WojciechMula/base64-avx512)
-* [aklomp/base64](https://github.com/aklomp/base64)
-* [Nugine/simd](https://github.com/Nugine/simd)
-* [BLAKE3-team/BLAKE3](https://github.com/BLAKE3-team/BLAKE3)
+* 🐙 [WojciechMula/base64simd](https://github.com/WojciechMula/base64simd)
+* 🐙 [WojciechMula/base64-avx512](https://github.com/WojciechMula/base64-avx512)
+* 🐙 [aklomp/base64](https://github.com/aklomp/base64)
+* 🐙 [Nugine/simd](https://github.com/Nugine/simd)
+* 🐙 [BLAKE3-team/BLAKE3](https://github.com/BLAKE3-team/BLAKE3)
+* 🐙 [simdutf/simdutf](https://github.com/simdutf/simdutf)
 
 <div align="center">
 
