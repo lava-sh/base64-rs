@@ -6,6 +6,7 @@ python-version = "3.11"
 include = [
     "py-src/**/*.py",
     "py-src/**/*.pyi",
+    # Uncomment after python-version = "3.15"
     # "tests/*.py",
 ]
 exclude = [
