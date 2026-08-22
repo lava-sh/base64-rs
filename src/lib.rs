@@ -256,9 +256,12 @@ mod base64_rs {
                 padded,
                 crate::encode::ssse3::encode_simd_prefix,
             ),
-            _ => {
-                crate::encode::python::encode_urlsafe(py, s, padded, crate::encode::scalar::no_simd)
-            }
+            _ => crate::encode::python::encode_urlsafe(
+                py,
+                s,
+                padded,
+                crate::encode::scalar::encode_simd_prefix,
+            ),
         }
     }
 }

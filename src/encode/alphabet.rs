@@ -39,8 +39,8 @@ impl Alphabet {
     #[must_use]
     pub const fn pairs(self) -> *const u16 {
         match self {
-            Self::Standard => super::scalar::STANDARD_PAIRS.as_ptr(),
-            Self::UrlSafe => super::scalar::URL_SAFE_PAIRS.as_ptr(),
+            Self::Standard => super::tables::STANDARD_PAIRS.as_ptr(),
+            Self::UrlSafe => super::tables::URLSAFE_PAIRS.as_ptr(),
         }
     }
 }

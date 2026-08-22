@@ -1,8 +1,14 @@
+// Based on:
+//
+// * https://github.com/aklomp/base64
+//   Last commit full SHA: bf058e571ac5002b75b03fed38e33ed4e8d45eff
+//                         ^^^^^^^^
+//   First 8:              bf058e57
 use pyo3::{prelude::*, types::PyBytes};
 
 use super::{
-    alphabet::{ALPHABET, URLSAFE_ALPHABET},
     python,
+    tables::{STANDARD_PAIRS, URLSAFE_PAIRS},
 };
 
 #[must_use]
@@ -10,15 +16,119 @@ pub const fn encode_pairs(alphabet: &[u8; 64]) -> [u16; 4096] {
     let mut buf = [0; 4096];
     let mut index = 0;
     while index < buf.len() {
-        let pair = [alphabet[index >> 6], alphabet[index & 0x3f]];
-        buf[index] = u16::from_ne_bytes(pair);
+        buf[index] = u16::from_ne_bytes([alphabet[index >> 6], alphabet[index & 0x3f]]);
         index += 1;
     }
     buf
 }
 
-pub const STANDARD_PAIRS: [u16; 4096] = encode_pairs(&ALPHABET.0);
-pub const URL_SAFE_PAIRS: [u16; 4096] = encode_pairs(&URLSAFE_ALPHABET.0);
+// https://github.com/aklomp/base64/blob/bf058e57/lib/arch/generic/64/enc_loop.c#L2-L28
+#[inline(always)]
+unsafe fn enc_loop_generic_64_inner(s: &mut *const u8, o: &mut *mut u8, table: *const u16) {
+    // Load input:
+    let mut src = unsafe { s.cast::<u64>().read_unaligned() };
+
+    // Reorder to 64-bit big-endian, if not already in that format. The
+    // workset must be in big-endian, otherwise the shifted bits do not
+    // carry over properly among adjacent bytes:
+    src = src.swap_bytes();
+
+    // Four indices for the 12-bit lookup table:
+    let index0 = ((src >> 52) & 0x0fff) as usize;
+    let index1 = ((src >> 40) & 0x0fff) as usize;
+    let index2 = ((src >> 28) & 0x0fff) as usize;
+    let index3 = ((src >> 16) & 0x0fff) as usize;
+
+    // Table lookup and store:
+    unsafe {
+        o.cast::<u16>().write_unaligned(table.add(index0).read());
+        o.add(2)
+            .cast::<u16>()
+            .write_unaligned(table.add(index1).read());
+        o.add(4)
+            .cast::<u16>()
+            .write_unaligned(table.add(index2).read());
+        o.add(6)
+            .cast::<u16>()
+            .write_unaligned(table.add(index3).read());
+
+        *s = s.add(6);
+        *o = o.add(8);
+    }
+}
+
+// https://github.com/aklomp/base64/blob/bf058e57/lib/arch/generic/64/enc_loop.c#L30-L77
+#[inline(always)]
+pub unsafe fn encode_simd_prefix(
+    mut s: *const u8,
+    len: usize,
+    mut o: *mut u8,
+    alphabet: *const u8,
+) -> usize {
+    let suffix = unsafe { [alphabet.add(62).read(), alphabet.add(63).read()] };
+
+    if !matches!(suffix, [b'+', b'/'] | [b'-', b'_']) && len < 32 * 1024 {
+        return 0;
+    }
+
+    let runtime_table = match suffix {
+        [b'+', b'/'] | [b'-', b'_'] => None,
+        _ => Some(encode_pairs(unsafe { &*alphabet.cast::<[u8; 64]>() })),
+    };
+
+    let table = runtime_table.as_ref().map_or_else(
+        || match suffix {
+            [b'+', b'/'] => STANDARD_PAIRS.as_ptr(),
+            [b'-', b'_'] => URLSAFE_PAIRS.as_ptr(),
+            _ => unreachable!(),
+        },
+        |table| table.as_ptr(),
+    );
+
+    if len < 8 {
+        return 0;
+    }
+
+    // Process blocks of 6 bytes at a time. Because blocks are loaded 8
+    // bytes at a time, ensure that there will be at least 2 remaining
+    // bytes after the last round, so that the final read will not pass
+    // beyond the bounds of the input buffer:
+    let mut rounds = (len - 2) / 6;
+    let consumed = rounds * 6;
+
+    while rounds > 0 {
+        if rounds >= 8 {
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            rounds -= 8;
+            continue;
+        }
+        if rounds >= 4 {
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            rounds -= 4;
+            continue;
+        }
+        if rounds >= 2 {
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+            rounds -= 2;
+            continue;
+        }
+        unsafe { enc_loop_generic_64_inner(&mut s, &mut o, table) };
+        break;
+    }
+
+    consumed
+}
 
 #[inline(always)]
 unsafe fn encode_triplet(input: *const u8, output: *mut u8, alphabet: *const u8) {
@@ -190,12 +300,6 @@ pub unsafe fn encode_into(
     written
 }
 
-#[must_use]
-#[inline(always)]
-pub const unsafe fn no_simd(_: *const u8, _: usize, _: *mut u8, _: *const u8) -> usize {
-    0
-}
-
 #[inline]
 pub fn encode<'py>(
     py: Python<'py>,
@@ -204,5 +308,5 @@ pub fn encode<'py>(
     padded: bool,
     wrapcol: isize,
 ) -> PyResult<Bound<'py, PyBytes>> {
-    python::encode(py, s, altchars, padded, wrapcol, no_simd)
+    python::encode(py, s, altchars, padded, wrapcol, encode_simd_prefix)
 }
