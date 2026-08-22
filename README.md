@@ -21,8 +21,9 @@ _High-performance base64 encoder/decoder written in Rust🦅_
 * High-performance base64 encoder/decoder
 
 * Runtime SIMD dispatch with support for:
-  * AVX-512F, AVX-512VBMI, AVX2, AVX
+  * AVX-512F, AVX-512VL, AVX-512VBMI, AVX2, AVX
   * SSE4.2, SSE4.1, SSSE3
+  * NEON64, NEON32
 
 * Drop-in replacement for CPython [base64][cpython-base64] (see: [below](https://github.com/lava-sh/base64-rs#compatibility-with-cpython-base64))
 
@@ -94,11 +95,11 @@ print(base64.urlsafe_b64encode(b"\xfb\xff"))  # b'-_8='
 
 ### Papers
 
-* [Base64 encoding and decoding at almost the speed of a memory copy](https://arxiv.org/pdf/1910.05109)
-* [AVX512F base64 coding and decoding](http://0x80.pl/notesen/2016-09-17-avx512-foundation-base64.html)
-* [Base64 encoding & decoding using AVX512BW instructions](http://0x80.pl/notesen/2016-04-03-avx512-base64.html)
-* [Base64 encoding with SIMD instructions](http://0x80.pl/notesen/2016-01-12-sse-base64-encoding.html)
-* [Base64 decoding with SIMD instructions](http://0x80.pl/notesen/2016-01-17-sse-base64-decoding.html)
+* 📗 [Base64 encoding and decoding at almost the speed of a memory copy](https://arxiv.org/pdf/1910.05109)
+* 📗 [AVX512F base64 coding and decoding](http://0x80.pl/notesen/2016-09-17-avx512-foundation-base64.html)
+* 📗 [Base64 encoding & decoding using AVX512BW instructions](http://0x80.pl/notesen/2016-04-03-avx512-base64.html)
+* 📗 [Base64 encoding with SIMD instructions](http://0x80.pl/notesen/2016-01-12-sse-base64-encoding.html)
+* 📗 [Base64 decoding with SIMD instructions](http://0x80.pl/notesen/2016-01-17-sse-base64-decoding.html)
 
 ### GitHub repos
 

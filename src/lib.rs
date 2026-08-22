@@ -63,85 +63,131 @@ mod base64_rs {
         }
     }
 
-    #[rustfmt::skip]
-    macro_rules! b64encode_simd_fn {
-        ($fn_name:ident, $py_name:literal, $cfg:meta, $isa:path, $err_msg:literal, $encode:path) => {
-            #[allow(dead_code)]
-            #[cfg($cfg)]
-            #[pyfunction(
-                name = $py_name,
-                signature = (s, altchars = None, *, padded = true, wrapcol = 0)
-            )]
-            fn $fn_name<'py>(
-                py: Python<'py>,
-                s: &Bound<'py, PyAny>,
-                altchars: Option<&Bound<'py, PyAny>>,
-                padded: bool,
-                wrapcol: isize,
-            ) -> PyResult<Bound<'py, PyBytes>> {
-                if !matches!(SimdIsa::detected(), $isa) {
-                    return Err(pyo3::exceptions::PyRuntimeError::new_err($err_msg));
-                }
-
-                // SAFETY: the cached runtime ISA check above.
-                unsafe { $encode(py, s, altchars, padded, wrapcol) }
-            }
-        };
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    #[pyfunction(
+        name = "_b64encode_avx512",
+        signature = (s, altchars = None, *, padded = true, wrapcol = 0)
+    )]
+    fn b64encode_avx512<'py>(
+        py: Python<'py>,
+        s: &Bound<'py, PyAny>,
+        altchars: Option<&Bound<'py, PyAny>>,
+        padded: bool,
+        wrapcol: isize,
+    ) -> PyResult<Bound<'py, PyBytes>> {
+        if SimdIsa::detected() != SimdIsa::Avx512 {
+            return Err(pyo3::exceptions::PyRuntimeError::new_err(
+                "AVX-512F, AVX-512BW and AVX-512VBMI are not supported by this CPU",
+            ));
+        }
+        // SAFETY: the cached runtime ISA check above.
+        unsafe { crate::encode::avx512::encode(py, s, altchars, padded, wrapcol) }
     }
 
-    b64encode_simd_fn!(
-        b64encode_avx512,
-        "_b64encode_avx512",
-        any(target_arch = "x86", target_arch = "x86_64"),
-        SimdIsa::Avx512,
-        "AVX-512F and AVX-512VBMI are not supported by this CPU",
-        crate::encode::avx512::encode
-    );
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    #[pyfunction(
+        name = "_b64encode_avx2",
+        signature = (s, altchars = None, *, padded = true, wrapcol = 0)
+    )]
+    fn b64encode_avx2<'py>(
+        py: Python<'py>,
+        s: &Bound<'py, PyAny>,
+        altchars: Option<&Bound<'py, PyAny>>,
+        padded: bool,
+        wrapcol: isize,
+    ) -> PyResult<Bound<'py, PyBytes>> {
+        if SimdIsa::detected() != SimdIsa::Avx2 {
+            return Err(pyo3::exceptions::PyRuntimeError::new_err(
+                "AVX2 is not supported by this CPU",
+            ));
+        }
+        // SAFETY: the cached runtime ISA check above.
+        unsafe { crate::encode::avx2::encode(py, s, altchars, padded, wrapcol) }
+    }
 
-    b64encode_simd_fn!(
-        b64encode_avx2,
-        "_b64encode_avx2",
-        any(target_arch = "x86", target_arch = "x86_64"),
-        SimdIsa::Avx2,
-        "AVX2 is not supported by this CPU",
-        crate::encode::avx2::encode
-    );
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    #[pyfunction(
+        name = "_b64encode_avx",
+        signature = (s, altchars = None, *, padded = true, wrapcol = 0)
+    )]
+    fn b64encode_avx<'py>(
+        py: Python<'py>,
+        s: &Bound<'py, PyAny>,
+        altchars: Option<&Bound<'py, PyAny>>,
+        padded: bool,
+        wrapcol: isize,
+    ) -> PyResult<Bound<'py, PyBytes>> {
+        if SimdIsa::detected() != SimdIsa::Avx {
+            return Err(pyo3::exceptions::PyRuntimeError::new_err(
+                "AVX is not supported by this CPU",
+            ));
+        }
+        // SAFETY: the cached runtime ISA check above.
+        unsafe { crate::encode::avx::encode(py, s, altchars, padded, wrapcol) }
+    }
 
-    b64encode_simd_fn!(
-        b64encode_avx,
-        "_b64encode_avx",
-        any(target_arch = "x86", target_arch = "x86_64"),
-        SimdIsa::Avx,
-        "AVX is not supported by this CPU",
-        crate::encode::avx::encode
-    );
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    #[pyfunction(
+        name = "_b64encode_ssse3",
+        signature = (s, altchars = None, *, padded = true, wrapcol = 0)
+    )]
+    fn b64encode_ssse3<'py>(
+        py: Python<'py>,
+        s: &Bound<'py, PyAny>,
+        altchars: Option<&Bound<'py, PyAny>>,
+        padded: bool,
+        wrapcol: isize,
+    ) -> PyResult<Bound<'py, PyBytes>> {
+        if SimdIsa::detected() != SimdIsa::Ssse3 {
+            return Err(pyo3::exceptions::PyRuntimeError::new_err(
+                "SSSE3 is not supported by this CPU",
+            ));
+        }
+        // SAFETY: the cached runtime ISA check above.
+        unsafe { crate::encode::ssse3::encode(py, s, altchars, padded, wrapcol) }
+    }
 
-    b64encode_simd_fn!(
-        b64encode_ssse3,
-        "_b64encode_ssse3",
-        any(target_arch = "x86", target_arch = "x86_64"),
-        SimdIsa::Ssse3,
-        "SSSE3 is not supported by this CPU",
-        crate::encode::ssse3::encode
-    );
+    #[cfg(any(target_arch = "aarch64", target_arch = "arm64ec"))]
+    #[pyfunction(
+        name = "_b64encode_neon64",
+        signature = (s, altchars = None, *, padded = true, wrapcol = 0)
+    )]
+    fn b64encode_neon64<'py>(
+        py: Python<'py>,
+        s: &Bound<'py, PyAny>,
+        altchars: Option<&Bound<'py, PyAny>>,
+        padded: bool,
+        wrapcol: isize,
+    ) -> PyResult<Bound<'py, PyBytes>> {
+        if SimdIsa::detected() != SimdIsa::Neon64 {
+            return Err(pyo3::exceptions::PyRuntimeError::new_err(
+                "NEON is not supported by this CPU",
+            ));
+        }
+        // SAFETY: the cached runtime ISA check above.
+        unsafe { crate::encode::neon64::encode(py, s, altchars, padded, wrapcol) }
+    }
 
-    b64encode_simd_fn!(
-        b64encode_neon64,
-        "_b64encode_neon64",
-        any(target_arch = "aarch64", target_arch = "arm64ec"),
-        SimdIsa::Neon64,
-        "NEON is not supported by this CPU",
-        crate::encode::neon64::encode
-    );
-
-    b64encode_simd_fn!(
-        b64encode_neon32,
-        "_b64encode_neon32",
-        target_arch = "arm",
-        SimdIsa::Neon32,
-        "NEON is not supported by this CPU",
-        crate::encode::neon32::encode
-    );
+    #[cfg(target_arch = "arm")]
+    #[pyfunction(
+        name = "_b64encode_neon32",
+        signature = (s, altchars = None, *, padded = true, wrapcol = 0)
+    )]
+    fn b64encode_neon32<'py>(
+        py: Python<'py>,
+        s: &Bound<'py, PyAny>,
+        altchars: Option<&Bound<'py, PyAny>>,
+        padded: bool,
+        wrapcol: isize,
+    ) -> PyResult<Bound<'py, PyBytes>> {
+        if SimdIsa::detected() != SimdIsa::Neon32 {
+            return Err(pyo3::exceptions::PyRuntimeError::new_err(
+                "NEON is not supported by this CPU",
+            ));
+        }
+        // SAFETY: the cached runtime ISA check above.
+        unsafe { crate::encode::neon32::encode(py, s, altchars, padded, wrapcol) }
+    }
 
     #[pyfunction(
         name = "_b64encode_scalar",
