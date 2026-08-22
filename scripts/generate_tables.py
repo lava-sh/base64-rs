@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 OUT = Path(__file__).resolve().parents[1] / "src" / "encode" / "tables"
 
 ALPHABETS = {
