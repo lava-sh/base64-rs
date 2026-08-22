@@ -13,7 +13,12 @@ requires-python = ">= 3.11"
 description = "High-performance base64 encoder/decoder written in Rust"
 readme = { file = "README.md", content-type = "text/markdown" }
 license = "Unlicense"
-license-files = ["UNLICENSE"]
+license-files = [
+    "UNLICENSE",
+    "THIRD_PARTY_LICENSES/base64-LICENSE",
+    "THIRD_PARTY_LICENSES/simdutf-LICENSE-APACHE",
+    "THIRD_PARTY_LICENSES/simdutf-LICENSE-MIT",
+]
 authors = [
     { name = "chirizxc", email = "chirizxc@proton.me" }
 ]

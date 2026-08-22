@@ -84,7 +84,7 @@ pub unsafe fn encode_simd_prefix(
 
         // Translation 6-bit values to ASCII.
         let result = _mm512_permutexvar_epi8(indices, lookup);
-        
+
         // Store.
         unsafe { _mm512_storeu_si512(dst.cast(), result) };
         src = unsafe { src.add(BYTES_CONSUMED_PER_ROUND) };
