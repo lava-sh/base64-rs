@@ -9,5 +9,5 @@ updates:
   - package-ecosystem: "cargo" # zizmor: ignore[dependabot-cooldown]
     directory: "/"
     schedule:
-      cronjob: "weekly"
+      interval: "weekly"
     target-branch: main
