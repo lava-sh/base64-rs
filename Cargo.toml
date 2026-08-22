@@ -1,0 +1,82 @@
+[package]
+name = "base64-rs"
+version = "0.0.1"
+edition = "2024"
+license = "Unlicense"
+repository = "https://github.com/lava-sh/base64-rs"
+
+[lib]
+name = "_base64_rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "=0.29.2", features = ["nightly"]}
+
+[target.'cfg(not(any(target_os = "macos", target_os = "windows")))'.dependencies]
+mimalloc = {
+    optional = true,
+    version = "=0.1.52",
+    features = [
+        "override",
+        "local_dynamic_tls",
+    ]
+}
+
+[target.'cfg(target_os = "macos")'.dependencies]
+mimalloc = {
+    optional = true,
+    version = "=0.1.52",
+    # See: https://github.com/lava-sh/toml-rs/issues/229
+    #
+    # mimalloc "override" feature installs process-wide malloc interposition and
+    # replaces macOS malloc zone/fork hooks when the extension is imported via dlopen.
+    # That breaks fork-based subprocess spawning, e.g., asyncio/playwright can fail.
+    features = [
+        "local_dynamic_tls",
+    ]
+}
+
+[target.'cfg(target_os = "windows")'.dependencies]
+mimalloc = {
+    optional = true,
+    version = "=0.1.52",
+    features = [],
+}
+
+[features]
+default = []
+mimalloc = ["dep:mimalloc"]
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+panic = "abort"
+strip = "symbols"
+codegen-units = 1
+
+[lints.rust]
+warnings = "deny"
+
+[lints.clippy]
+perf       = { level = "deny", priority = 1 }
+style      = { level = "deny", priority = -1 }
+pedantic   = { level = "deny", priority = -1 }
+nursery    = { level = "deny", priority = -1 }
+complexity = { level = "deny", priority = -1 }
+suspicious = { level = "deny", priority = -1 }
+
+std_instead_of_core = "deny"
+std_instead_of_alloc = "deny"
+alloc_instead_of_core = "deny"
+
+inline_always = "allow"
+cast_ptr_alignment = "allow"
+missing_errors_doc = "allow"
+cast_possible_truncation = "allow"
+
+# maybe TODO
+too_many_lines = "allow"
+missing_const_for_fn = "allow"
+
+# TODO
+missing_safety_doc = "allow"
