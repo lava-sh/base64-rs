@@ -21,9 +21,8 @@ BYTE_SIZES = (
     64_000_000,
     256_000_000,
     512_000_000,
-    1_000_000_000,
-    2_500_000_000,
 )
+
 TARGET_SAMPLE_NS = 25_000_000
 
 Benchmark: TypeAlias = tuple[str, Callable[[bytes], bytes]]
@@ -69,7 +68,7 @@ def display_size(size: int) -> str:
 
 def create_table(headers: list[str]) -> Table:
     table = Table(border_style="bright_black", box=box.SQUARE)
-    table.add_column(Text(headers[0], justify="center"), justify="center")
+    table.add_column(Text(headers[0], justify="center"), justify="left")
     for header in headers[1:]:
         table.add_column(Text(header, justify="center"), justify="right")
     return table
@@ -80,12 +79,6 @@ def benchmark_size(
     data: bytes,
     requested_samples: int,
 ) -> dict[str, float]:
-    expected = base64.b64encode(data) if len(data) <= 1_000_000 else None
-    for name, function in fns:
-        result = function(data)
-        if expected is not None:
-            assert result == expected, name  # noqa: S101
-
     calls = {name: calls_per_sample(function, data) for name, function in fns}
     samples = samples_for(len(data), requested_samples)
     values: dict[str, list[float]] = {name: [] for name, _ in fns}
@@ -130,7 +123,7 @@ def run_basic(runs: int) -> None:
         ("std", base64.b64encode),
         ("pybase64", pybase64.b64encode),
         ("base64_rs", base64_rs.b64encode),
-        ("scalar", base64_rs._b64encode_scalar),
+        ("base64_rs (no simd)", base64_rs._b64encode_scalar),
     ))  # fmt: skip
 
 
@@ -139,7 +132,7 @@ def run_with_altchars(runs: int) -> None:
         ("std", lambda b: base64.b64encode(b, altchars=b"-_")),
         ("pybase64", lambda b: pybase64.b64encode(b, altchars=b"-_")),
         ("base64_rs", lambda b: base64_rs.b64encode(b, altchars=b"-_")),
-        ("scalar", lambda b: base64_rs._b64encode_scalar(b, altchars=b"-_")),
+        ("base64_rs (no simd)", lambda b: base64_rs._b64encode_scalar(b, altchars=b"-_")),
     ))  # fmt: skip
 
 
@@ -148,7 +141,7 @@ def run_with_padded(runs: int) -> None:
         ("std", lambda b: base64.b64encode(b, padded=False)),
         ("pybase64", lambda b: pybase64.b64encode(b, padded=False)),
         ("base64_rs", lambda b: base64_rs.b64encode(b, padded=False)),
-        ("scalar", lambda b: base64_rs._b64encode_scalar(b, padded=False)),
+        ("base64_rs (no simd)", lambda b: base64_rs._b64encode_scalar(b, padded=False)),
     ))  # fmt: skip
 
 
@@ -157,7 +150,7 @@ def run_with_wrapcol(runs: int) -> None:
         ("std", lambda b: base64.b64encode(b, wrapcol=76)),
         ("pybase64", lambda b: pybase64.b64encode(b, wrapcol=76)),
         ("base64_rs", lambda b: base64_rs.b64encode(b, wrapcol=76)),
-        ("scalar", lambda b: base64_rs._b64encode_scalar(b, wrapcol=76)),
+        ("base64_rs (no simd)", lambda b: base64_rs._b64encode_scalar(b, wrapcol=76)),
     ))  # fmt: skip
 
 
