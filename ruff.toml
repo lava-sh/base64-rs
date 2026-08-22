@@ -11,6 +11,7 @@ include = [
     "benchmark/run.py",
     "pyproject.toml",
     "README.md",
+    "scripts/generate_tables.py"
 ]
 
 [lint.isort]
@@ -42,18 +43,20 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-"benchmark/**.py" = [
+"benchmark/*.py" = [
     "INP001", # Check for packages that are missing an __init__.py file.
     "SLF001",
     "PLR2004",
 ]
-"tests/**.py" = [
+"tests/*.py" = [
     "DOC",     # Docstring's
     ########
     "S101",    # Check for uses of the `assert` keyword.
     "PLR2004", # Check for the use of unnamed numerical constants ("magic") values in comparisons.
 ]
-
+"scripts/*.py" = [
+    "INP001",
+]
 [lint.flake8-tidy-imports.banned-api]
 "contextlib.suppress" = { msg = "Use `try-except-pass` instead" }
 "__future__.annotations" = { msg = "Directly quote annotations instead" }
