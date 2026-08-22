@@ -131,103 +131,6 @@ pub unsafe fn encode_simd_prefix(
 }
 
 #[inline(always)]
-unsafe fn encode_triplet(input: *const u8, output: *mut u8, alphabet: *const u8) {
-    unsafe {
-        let bits = (u32::from(input.read())) << 16
-            | (u32::from(input.add(1).read())) << 8
-            | u32::from(input.add(2).read());
-
-        output.write(alphabet.add((bits >> 18) as usize & 0x3f).read());
-        output
-            .add(1)
-            .write(alphabet.add((bits >> 12) as usize & 0x3f).read());
-        output
-            .add(2)
-            .write(alphabet.add((bits >> 6) as usize & 0x3f).read());
-        output
-            .add(3)
-            .write(alphabet.add(bits as usize & 0x3f).read());
-    }
-}
-
-#[inline(always)]
-unsafe fn encode_triplet_pairs(input: *const u8, output: *mut u8, pairs: *const u16) {
-    unsafe {
-        let bits = (u32::from(input.read())) << 16
-            | (u32::from(input.add(1).read())) << 8
-            | u32::from(input.add(2).read());
-
-        output
-            .cast::<u16>()
-            .write_unaligned(pairs.add((bits >> 12) as usize).read());
-        output
-            .add(2)
-            .cast::<u16>()
-            .write_unaligned(pairs.add((bits & 0x0fff) as usize).read());
-    }
-}
-
-#[inline(always)]
-unsafe fn begin_wrapped_quad(
-    output: *mut u8,
-    written: &mut usize,
-    column: &mut usize,
-    wrapcol: usize,
-) -> *mut u8 {
-    unsafe {
-        if *column == wrapcol {
-            output.add(*written).write(b'\n');
-            *written += 1;
-            *column = 0;
-        }
-        output.add(*written)
-    }
-}
-
-#[inline(always)]
-unsafe fn encode_tail(input: *const u8, output: *mut u8, alphabet: *const u8, padded: u8) -> usize {
-    unsafe {
-        let bits = u32::from(input.read()) << 16;
-        output.write(alphabet.add((bits >> 18) as usize & 0x3f).read());
-        output
-            .add(1)
-            .write(alphabet.add((bits >> 12) as usize & 0x3f).read());
-        if padded != 0 {
-            output.add(2).write(b'=');
-            output.add(3).write(b'=');
-            4
-        } else {
-            2
-        }
-    }
-}
-
-#[inline(always)]
-unsafe fn encode_tail2(
-    input: *const u8,
-    output: *mut u8,
-    alphabet: *const u8,
-    padded: u8,
-) -> usize {
-    unsafe {
-        let bits = u32::from(input.read()) << 16 | u32::from(input.add(1).read()) << 8;
-        output.write(alphabet.add((bits >> 18) as usize & 0x3f).read());
-        output
-            .add(1)
-            .write(alphabet.add((bits >> 12) as usize & 0x3f).read());
-        output
-            .add(2)
-            .write(alphabet.add((bits >> 6) as usize & 0x3f).read());
-        if padded != 0 {
-            output.add(3).write(b'=');
-            4
-        } else {
-            3
-        }
-    }
-}
-
-#[inline(always)]
 pub unsafe fn encode_into(
     input: *const u8,
     input_len: usize,
@@ -260,30 +163,79 @@ pub unsafe fn encode_into(
     let end = unsafe { input.add(input_len - input_len % 3) };
 
     while cursor < end {
-        unsafe {
-            let out = begin_wrapped_quad(output, &mut written, &mut column, wrapcol);
-            if pair_table.is_null() {
-                encode_triplet(cursor, out, alphabet);
-            } else {
-                encode_triplet_pairs(cursor, out, pair_table);
-            }
-            cursor = cursor.add(3);
+        if column == wrapcol {
+            unsafe { output.add(written).write(b'\n') };
+            written += 1;
+            column = 0;
         }
+
+        let out = unsafe { output.add(written) };
+        let first = unsafe { cursor.read() };
+        let second = unsafe { cursor.add(1).read() };
+        let third = unsafe { cursor.add(2).read() };
+        let bits = u32::from(first) << 16 | u32::from(second) << 8 | u32::from(third);
+
+        if pair_table.is_null() {
+            let first = unsafe { alphabet.add((bits >> 18) as usize & 0x3f).read() };
+            let second = unsafe { alphabet.add((bits >> 12) as usize & 0x3f).read() };
+            let third = unsafe { alphabet.add((bits >> 6) as usize & 0x3f).read() };
+            let fourth = unsafe { alphabet.add(bits as usize & 0x3f).read() };
+            unsafe { out.write(first) };
+            unsafe { out.add(1).write(second) };
+            unsafe { out.add(2).write(third) };
+            unsafe { out.add(3).write(fourth) };
+        } else {
+            let first = unsafe { pair_table.add((bits >> 12) as usize).read() };
+            let second = unsafe { pair_table.add((bits & 0x0fff) as usize).read() };
+            unsafe { out.cast::<u16>().write_unaligned(first) };
+            unsafe { out.add(2).cast::<u16>().write_unaligned(second) };
+        }
+
+        cursor = unsafe { cursor.add(3) };
         written += 4;
         column += 4;
     }
 
-    let tail_len = unsafe {
-        match input_len % 3 {
-            1 => {
-                let out = begin_wrapped_quad(output, &mut written, &mut column, wrapcol);
-                encode_tail(cursor, out, alphabet, padded)
+    let tail_len = match input_len % 3 {
+        0 => 0,
+        remaining => {
+            if column == wrapcol {
+                unsafe { output.add(written).write(b'\n') };
+                written += 1;
             }
-            2 => {
-                let out = begin_wrapped_quad(output, &mut written, &mut column, wrapcol);
-                encode_tail2(cursor, out, alphabet, padded)
+
+            let out = unsafe { output.add(written) };
+            let first = unsafe { cursor.read() };
+            let first_encoded = unsafe { alphabet.add((first >> 2) as usize).read() };
+            unsafe { out.write(first_encoded) };
+
+            if remaining == 1 {
+                let second_encoded = unsafe { alphabet.add(((first & 3) << 4) as usize).read() };
+                unsafe { out.add(1).write(second_encoded) };
+                if padded != 0 {
+                    unsafe { out.add(2).write(b'=') };
+                    unsafe { out.add(3).write(b'=') };
+                    4
+                } else {
+                    2
+                }
+            } else {
+                let second = unsafe { cursor.add(1).read() };
+                let second_encoded = unsafe {
+                    alphabet
+                        .add((((first & 3) << 4) | (second >> 4)) as usize)
+                        .read()
+                };
+                let third_encoded = unsafe { alphabet.add(((second & 15) << 2) as usize).read() };
+                unsafe { out.add(1).write(second_encoded) };
+                unsafe { out.add(2).write(third_encoded) };
+                if padded != 0 {
+                    unsafe { out.add(3).write(b'=') };
+                    4
+                } else {
+                    3
+                }
             }
-            _ => 0,
         }
     };
     written += tail_len;
