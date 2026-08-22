@@ -32,7 +32,7 @@ pub unsafe fn encode_simd_prefix(
     mut dst: *mut u8,
     alphabet: *const u8,
 ) -> usize {
-    // Translate immediatedly after reshuffled.
+    // Translate immediately after reshuffled.
     let lookup = unsafe { _mm512_loadu_si512(alphabet.cast()) };
 
     // 32-bit input
