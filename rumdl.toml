@@ -16,3 +16,6 @@ allowed-elements = [
     "no-markdown-equivalent",
     "img", "p", "a", "h3",
 ]
+
+[MD013]
+line-length = 100
